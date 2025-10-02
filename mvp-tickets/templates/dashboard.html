@@ -3,77 +3,148 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<section class="page-section">
-  <header class="surface-panel page-header">
-    <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-      <div class="space-y-3">
-        <span class="page-eyebrow">Panel</span>
-        <h1 class="page-title">Control maestro de tu operación</h1>
-        <p class="page-subtitle">Visualiza el pulso de la mesa de ayuda, detecta bloqueos y acciona a tu equipo con datos en tiempo real.</p>
+<section class="space-y-10">
+  <header class="grid gap-6 xl:grid-cols-[minmax(0,1.65fr)_minmax(0,1fr)]">
+    <article class="surface-panel surface-panel--gradient overflow-hidden">
+      <div class="flex flex-col justify-between gap-8 lg:flex-row">
+        <div class="max-w-xl space-y-5">
+          <div class="flex items-center gap-3 text-sm uppercase tracking-[0.2em] text-sky-200">
+            <span class="inline-flex h-2 w-2 rounded-full bg-sky-200"></span>
+            Panel ejecutivo
+          </div>
+          <div class="space-y-3">
+            <h1 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">Tu mesa de ayuda, en modo misión crítica</h1>
+            <p class="text-base text-sky-100/80">Observa el ritmo operativo, desbloquea cuellos de botella y alinea a tu equipo con decisiones respaldadas por datos en segundos.</p>
+          </div>
+          <div class="flex flex-wrap gap-3">
+            <a href="{% url 'tickets_home' %}" class="btn btn-primary"><i class="bi bi-life-preserver"></i> Ver tablero de tickets</a>
+            <a href="{% url 'reports_dashboard' %}" class="btn btn-ghost"><i class="bi bi-bar-chart"></i> Reportes avanzados</a>
+          </div>
+        </div>
+        <div class="grid h-full w-full max-w-xs place-content-center rounded-3xl bg-white/15 px-6 py-8 text-center shadow-lg shadow-sky-900/20 backdrop-blur">
+          <div class="space-y-4">
+            <p class="text-xs uppercase tracking-[0.25em] text-sky-50/70">Pulso actual</p>
+            <p class="text-5xl font-semibold text-white">{{ counts.open|default:0 }}</p>
+            <p class="text-sm text-sky-100/80">Tickets activos exigiendo respuesta inmediata.</p>
+            <div class="flex items-center justify-center gap-2 text-xs font-medium text-sky-50/70">
+              <span class="inline-flex h-2 w-2 rounded-full bg-emerald-300"></span>
+              Ritmo saludable
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="page-actions">
-        <a href="{% url 'tickets_home' %}" class="btn btn-primary"><i class="bi bi-life-preserver"></i> Gestionar tickets</a>
-        <a href="{% url 'reports_dashboard' %}" class="btn btn-ghost"><i class="bi bi-bar-chart"></i> Ver reportes</a>
+    </article>
+
+    <article class="surface-panel surface-panel--muted">
+      <div class="flex items-start justify-between">
+        <div class="space-y-2">
+          <p class="text-sm font-semibold text-muted">Resumen operativo</p>
+          <p class="text-xs text-muted-soft">Una cápsula con lo esencial para arrancar el día.</p>
+        </div>
+        <span class="pill pill--accent"><i class="bi bi-stars"></i> Live</span>
       </div>
-    </div>
+      <dl class="grid grid-cols-1 gap-4 pt-6 sm:grid-cols-2">
+        <div class="rounded-2xl border border-white/5 bg-white/5 p-4">
+          <dt class="text-xs uppercase tracking-wide text-muted-soft">En progreso</dt>
+          <dd class="mt-1 flex items-baseline gap-2">
+            <span class="text-2xl font-semibold">{{ counts.in_progress|default:0 }}</span>
+            <span class="pill pill--muted text-xs"><i class="bi bi-people"></i> En manos del equipo</span>
+          </dd>
+        </div>
+        <div class="rounded-2xl border border-white/5 bg-white/5 p-4">
+          <dt class="text-xs uppercase tracking-wide text-muted-soft">Resueltos (mes)</dt>
+          <dd class="mt-1 flex items-baseline gap-2">
+            <span class="text-2xl font-semibold">{{ counts.resolved|default:0 }}</span>
+            <span class="text-xs text-muted">VS objetivo mensual</span>
+          </dd>
+        </div>
+        <div class="rounded-2xl border border-white/5 bg-white/5 p-4">
+          <dt class="text-xs uppercase tracking-wide text-muted-soft">Cerrados (mes)</dt>
+          <dd class="mt-1 flex items-baseline gap-2">
+            <span class="text-2xl font-semibold">{{ counts.closed|default:0 }}</span>
+            <span class="text-xs text-muted">Cumplimiento SLA</span>
+          </dd>
+        </div>
+        {% with open_tickets=counts.open|default:0 in_progress_tickets=counts.in_progress|default:0 %}
+        <div class="rounded-2xl border border-white/5 bg-white/5 p-4">
+          <dt class="text-xs uppercase tracking-wide text-muted-soft">Backlog</dt>
+          <dd class="mt-1 flex items-baseline gap-2">
+            <span class="text-2xl font-semibold">{{ open_tickets|add:in_progress_tickets }}</span>
+            <span class="text-xs text-muted">Pendientes acumulados</span>
+          </dd>
+        </div>
+        {% endwith %}
+      </dl>
+      <div class="mt-6 flex flex-wrap gap-3 text-xs text-muted">
+        <span class="pill pill--muted"><i class="bi bi-lightning"></i> Alertas automáticas activas</span>
+        <span class="pill pill--muted"><i class="bi bi-chat-dots"></i> Comunicación con agentes abierta</span>
+      </div>
+    </article>
   </header>
 
-  <section class="stat-grid">
-    <article class="stat-card">
-      <div class="flex items-center justify-between">
-        <span class="stat-card__label">Abiertos</span>
-        <span class="stat-card__icon"><i class="bi bi-life-preserver"></i></span>
+  <section class="grid gap-6 lg:grid-cols-2 xl:grid-cols-4">
+    <article class="surface-panel surface-panel--muted flex flex-col gap-4">
+      <div class="flex items-center justify-between text-sm text-muted">
+        <span>Tickets abiertos</span>
+        <i class="bi bi-life-preserver text-lg text-sky-400"></i>
       </div>
-      <p class="stat-card__value">{{ counts.open }}</p>
+      <p class="text-3xl font-semibold">{{ counts.open|default:0 }}</p>
+      <p class="text-xs text-muted-soft">Monitorea los casos que aún esperan primer contacto.</p>
     </article>
-    <article class="stat-card">
-      <div class="flex items-center justify-between">
-        <span class="stat-card__label">En progreso</span>
-        <span class="stat-card__icon"><i class="bi bi-gear-wide-connected"></i></span>
+    <article class="surface-panel surface-panel--muted flex flex-col gap-4">
+      <div class="flex items-center justify-between text-sm text-muted">
+        <span>En progreso</span>
+        <i class="bi bi-gear-wide-connected text-lg text-amber-400"></i>
       </div>
-      <p class="stat-card__value">{{ counts.in_progress }}</p>
+      <p class="text-3xl font-semibold">{{ counts.in_progress|default:0 }}</p>
+      <p class="text-xs text-muted-soft">Asegura seguimiento y colaboración en curso.</p>
     </article>
-    <article class="stat-card">
-      <div class="flex items-center justify-between">
-        <span class="stat-card__label">Resueltos (mes)</span>
-        <span class="stat-card__icon"><i class="bi bi-check2-circle"></i></span>
+    <article class="surface-panel surface-panel--muted flex flex-col gap-4">
+      <div class="flex items-center justify-between text-sm text-muted">
+        <span>Resueltos este mes</span>
+        <i class="bi bi-check-circle text-lg text-emerald-400"></i>
       </div>
-      <p class="stat-card__value">{{ counts.resolved }}</p>
+      <p class="text-3xl font-semibold">{{ counts.resolved|default:0 }}</p>
+      <p class="text-xs text-muted-soft">Confirma la capacidad de respuesta de tu equipo.</p>
     </article>
-    <article class="stat-card">
-      <div class="flex items-center justify-between">
-        <span class="stat-card__label">Cerrados (mes)</span>
-        <span class="stat-card__icon"><i class="bi bi-shield-lock"></i></span>
+    <article class="surface-panel surface-panel--muted flex flex-col gap-4">
+      <div class="flex items-center justify-between text-sm text-muted">
+        <span>Cerrados este mes</span>
+        <i class="bi bi-shield-lock text-lg text-indigo-400"></i>
       </div>
-      <p class="stat-card__value">{{ counts.closed }}</p>
+      <p class="text-3xl font-semibold">{{ counts.closed|default:0 }}</p>
+      <p class="text-xs text-muted-soft">Valida cumplimiento de acuerdos de servicio.</p>
     </article>
   </section>
 
-  <section class="grid gap-6 xl:grid-cols-[1.05fr_1fr]">
-    <article class="surface-panel surface-panel--muted">
-      <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div class="stack">
+  <section class="grid gap-6 2xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+    <article class="surface-panel surface-panel--muted space-y-6">
+      <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div class="space-y-1">
           <h2 class="heading-lg">Tickets urgentes</h2>
-          <p class="text-sm text-muted">Anticípate a los incidentes críticos con visibilidad total de responsables y tiempos.</p>
+          <p class="text-sm text-muted">Identifica qué incidentes necesitan liderazgo inmediato.</p>
         </div>
-        <span class="chip chip--danger"><i class="bi bi-lightning-charge"></i> Prioridad</span>
+        <a href="{% url 'tickets_home' %}?priority=alta" class="btn btn-ghost"><i class="bi bi-lightning-charge"></i> Ver todos</a>
       </div>
       {% if urgent_tickets %}
-      <ul class="card-list" role="list">
+      <ul class="space-y-4" role="list">
         {% for ticket in urgent_tickets %}
-        <li class="surface-panel surface-panel--compact surface-panel--tonal">
-          <div class="flex flex-wrap items-center justify-between gap-3 text-sm text-muted">
-            <a href="{% url 'ticket_detail' ticket.id %}" class="pill pill--accent" aria-label="Abrir ticket {{ ticket.code }}">
-              <i class="bi bi-hash"></i>
-              {{ ticket.code }}
-            </a>
-            <span class="pill pill--danger text-xs"><i class="bi bi-exclamation-triangle-fill"></i> {{ ticket.priority.name }}</span>
-          </div>
-          <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <p class="heading-md">{{ ticket.title }}</p>
-            <div class="flex flex-wrap items-center gap-3 text-sm text-muted">
-              <span class="pill pill--muted"><i class="bi bi-person-circle"></i>{% if ticket.assigned_to %}{{ ticket.assigned_to.username }}{% else %}-{% endif %}</span>
-              <span class="pill pill--warning text-xs"><i class="bi bi-hourglass-split"></i> {{ ticket.remaining_hours|floatformat:1 }} h</span>
+        <li class="surface-panel surface-panel--tonal surface-panel--compact border border-dashed border-sky-200/40">
+          <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div class="space-y-2">
+              <div class="flex flex-wrap items-center gap-3 text-xs text-muted-soft">
+                <a href="{% url 'ticket_detail' ticket.id %}" class="pill pill--accent" aria-label="Abrir ticket {{ ticket.code }}">
+                  <i class="bi bi-hash"></i>
+                  {{ ticket.code }}
+                </a>
+                <span class="pill pill--danger"><i class="bi bi-exclamation-triangle"></i> {{ ticket.priority.name }}</span>
+                <span class="pill pill--muted"><i class="bi bi-person-circle"></i>{% if ticket.assigned_to %}{{ ticket.assigned_to.username }}{% else %}Sin asignar{% endif %}</span>
+              </div>
+              <h3 class="text-lg font-semibold text-muted">{{ ticket.title }}</h3>
+            </div>
+            <div class="flex flex-col items-start gap-2 text-sm text-muted-soft md:items-end">
+              <span class="pill pill--warning"><i class="bi bi-hourglass-split"></i> {{ ticket.remaining_hours|floatformat:1 }} h restantes</span>
+              <a href="{% url 'ticket_detail' ticket.id %}" class="btn btn-primary"><i class="bi bi-arrow-right"></i> Intervenir</a>
             </div>
           </div>
         </li>
@@ -82,24 +153,24 @@
       {% else %}
       <div class="empty-state">
         <i class="bi bi-emoji-smile text-4xl text-emerald-300"></i>
-        <p class="text-base">No hay tickets urgentes. Tu equipo mantiene el tablero bajo control.</p>
+        <p class="text-base">Sin alertas críticas por ahora. Mantén la vigilancia con los tableros inteligentes.</p>
       </div>
       {% endif %}
     </article>
 
-    <article class="surface-panel surface-panel--gradient">
-      <div class="stack">
-        <h2 class="heading-lg">Distribución actual</h2>
-        <p class="text-sm text-muted">Comprueba cómo están distribuidos los estados en tiempo real.</p>
+    <article class="surface-panel surface-panel--gradient space-y-6">
+      <div class="space-y-1">
+        <h2 class="heading-lg text-white">Distribución de estados</h2>
+        <p class="text-sm text-sky-100/80">Controla la salud de tu operación en tiempo real. Ajusta la vista con los filtros inferiores.</p>
       </div>
-      <div class="mx-auto h-80 w-full max-w-xl">
+      <div class="mx-auto h-72 w-full max-w-sm">
         <canvas id="statusChart" aria-label="Gráfico circular de estado de tickets"></canvas>
       </div>
-      <div id="statusFilters" class="flex flex-wrap gap-3">
+      <div id="statusFilters" class="flex flex-wrap gap-3 text-xs">
         <label class="pill pill--accent" data-index="0">
           <input type="checkbox" class="status-toggle sr-only" data-index="0" checked>
           <span class="flex items-center gap-2">
-            <span class="inline-flex h-2.5 w-2.5 rounded-full" style="background-color: #bae6fd"></span>
+            <span class="inline-flex h-2.5 w-2.5 rounded-full" style="background-color: #38bdf8"></span>
             Abiertos
           </span>
           <span class="text-xs text-muted-soft">{{ counts.open }}</span>
@@ -107,7 +178,7 @@
         <label class="pill pill--accent" data-index="1">
           <input type="checkbox" class="status-toggle sr-only" data-index="1" checked>
           <span class="flex items-center gap-2">
-            <span class="inline-flex h-2.5 w-2.5 rounded-full" style="background-color: #fde68a"></span>
+            <span class="inline-flex h-2.5 w-2.5 rounded-full" style="background-color: #fbbf24"></span>
             En progreso
           </span>
           <span class="text-xs text-muted-soft">{{ counts.in_progress }}</span>
@@ -115,7 +186,7 @@
         <label class="pill pill--accent" data-index="2">
           <input type="checkbox" class="status-toggle sr-only" data-index="2" checked>
           <span class="flex items-center gap-2">
-            <span class="inline-flex h-2.5 w-2.5 rounded-full" style="background-color: #a7f3d0"></span>
+            <span class="inline-flex h-2.5 w-2.5 rounded-full" style="background-color: #34d399"></span>
             Resueltos (mes)
           </span>
           <span class="text-xs text-muted-soft">{{ counts.resolved }}</span>
@@ -123,25 +194,24 @@
         <label class="pill pill--accent" data-index="3">
           <input type="checkbox" class="status-toggle sr-only" data-index="3" checked>
           <span class="flex items-center gap-2">
-            <span class="inline-flex h-2.5 w-2.5 rounded-full" style="background-color: #fecdd3"></span>
+            <span class="inline-flex h-2.5 w-2.5 rounded-full" style="background-color: #f472b6"></span>
             Cerrados (mes)
           </span>
           <span class="text-xs text-muted-soft">{{ counts.closed }}</span>
         </label>
       </div>
-      <p class="text-xs text-muted-soft">Activa o desactiva estados para ajustar el gráfico a tus necesidades.</p>
     </article>
   </section>
 
-  <section class="grid gap-6 xl:grid-cols-[2fr_1fr]">
-    <article class="surface-panel surface-panel--gradient">
-      <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div class="stack">
+  <section class="grid gap-6 2xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+    <article class="surface-panel surface-panel--muted space-y-6">
+      <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div class="space-y-1">
           <h2 class="heading-lg">Tendencias de fallas</h2>
-          <p class="text-sm text-muted">Descubre patrones para anticiparte a incidentes recurrentes.</p>
+          <p class="text-sm text-muted">Descubre patrones y anticipa incidentes recurrentes con datos históricos.</p>
         </div>
         {% if has_failures_data %}
-        <span class="chip chip--accent"><i class="bi bi-clock-history"></i> Datos desde {{ failures_since|localtime|date:"d/m/Y" }}</span>
+        <span class="pill pill--accent"><i class="bi bi-clock-history"></i> Desde {{ failures_since|localtime|date:"d/m/Y" }}</span>
         {% endif %}
       </div>
 
@@ -159,23 +229,30 @@
       {% endif %}
     </article>
 
-    <article class="surface-panel surface-panel--muted">
-      <div class="stack">
+    <article class="surface-panel surface-panel--muted space-y-6">
+      <div class="space-y-1">
         <h3 class="heading-md">Fallas más comunes</h3>
-        <p class="text-sm text-muted">Top 15 categorías con mayor volumen reportado.</p>
+        <p class="text-sm text-muted">Top de categorías con mayor volumen reportado.</p>
       </div>
       {% if failure_breakdown %}
-      <ul class="card-list overflow-y-auto pr-2" role="list">
+      <ul class="space-y-3" role="list">
         {% for failure in failure_breakdown %}
-        <li class="surface-panel surface-panel--compact surface-panel--tonal">
-          <div class="flex items-center justify-between">
+        <li class="surface-panel surface-panel--tonal surface-panel--compact">
+          <div class="flex items-center justify-between gap-4">
             <div class="flex items-center gap-3">
-              <span class="avatar" style="background: linear-gradient(135deg, {{ failure.color }}33, {{ failure.color }}66);">{{ forloop.counter }}</span>
-              <span class="text-sm text-muted-soft">{{ failure.label }}</span>
+              <span class="avatar" style="background: linear-gradient(135deg, {{ failure.color }}33, {{ failure.color }}99);">{{ forloop.counter }}</span>
+              <div>
+                <p class="text-sm font-medium text-muted">{{ failure.label }}</p>
+                <p class="text-xs text-muted-soft">Tickets: {{ failure.total }}</p>
+              </div>
             </div>
-            <span class="text-sm text-muted-soft">{{ failure.total }}</span>
+            {% if failure_breakdown.0.total %}
+            <span class="pill pill--muted text-xs">
+              {% widthratio failure.total failure_breakdown.0.total 100 %}% del top
+            </span>
+            {% endif %}
           </div>
-          <div class="mt-2 h-2 w-full overflow-hidden rounded-full" style="background: rgba(148, 163, 184, 0.2);">
+          <div class="mt-3 h-2 w-full overflow-hidden rounded-full" style="background: rgba(148, 163, 184, 0.2);">
             {% if failure_breakdown.0.total %}
             <div class="h-full rounded-full" style="background: linear-gradient(90deg, {{ failure.color }}66, {{ failure.color }}aa); width: {% widthratio failure.total failure_breakdown.0.total 100 %}%;"></div>
             {% else %}
@@ -215,7 +292,7 @@
 
     if (statusCanvas) {
       const statusCtx = statusCanvas.getContext('2d');
-      const statusPalette = ['#bae6fd', '#fde68a', '#a7f3d0', '#fecdd3'];
+      const statusPalette = ['#38bdf8', '#fbbf24', '#34d399', '#f472b6'];
 
       statusChart = new Chart(statusCtx, {
         type: 'doughnut',

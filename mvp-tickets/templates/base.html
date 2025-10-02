@@ -88,9 +88,7 @@
   <div class="toast-wrap" role="status" aria-live="polite">
     {% for message in messages %}
       {% with lvl=message.tags %}
-        <div class="toast {% if 'success' in lvl %}toast-ok{% elif 'warning' in lvl %}toast-warn{% elif 'error' in lvl %}toast-err{% else %}toast-info{% endif %}">
-          {{ message }}
-        </div>
+        <div class="toast card {% if 'success' in lvl %}toast-ok{% elif 'warning' in lvl %}toast-warn{% elif 'error' in lvl %}toast-err{% else %}toast-info{% endif %}">{{ message }}</div>
       {% endwith %}
     {% endfor %}
   </div>

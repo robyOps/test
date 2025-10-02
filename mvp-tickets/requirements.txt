@@ -1,0 +1,10 @@
+Django
+Pillow
+django-cors-headers
+django-filter
+django-widget-tweaks
+djangorestframework
+djangorestframework-simplejwt
+psycopg2-binary
+xhtml2pdf
+openpyxl

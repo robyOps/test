@@ -568,6 +568,89 @@ a:focus-visible {
   gap: 1rem;
 }
 
+.hero-panel {
+  color: rgb(var(--text));
+}
+
+.hero-eyebrow {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(var(--accent-strong), 0.85);
+}
+
+html[data-theme="dark"] .hero-eyebrow {
+  color: rgba(var(--accent-soft), 0.9);
+}
+
+.hero-eyebrow__dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: rgba(var(--accent-strong), 0.9);
+  box-shadow: 0 0 0 2px rgba(var(--accent-strong), 0.2);
+}
+
+html[data-theme="dark"] .hero-eyebrow__dot {
+  background: rgba(var(--accent-soft), 0.85);
+  box-shadow: 0 0 0 2px rgba(var(--accent-soft), 0.25);
+}
+
+.hero-title {
+  font-size: clamp(2.25rem, 3.3vw, 2.8rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: rgb(var(--text));
+}
+
+.hero-subtitle {
+  font-size: 1rem;
+  color: rgba(var(--text-soft), 0.9);
+}
+
+html[data-theme="dark"] .hero-subtitle {
+  color: rgba(var(--text-soft), 0.85);
+}
+
+.hero-metric__label {
+  font-size: 0.75rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: rgba(var(--text-muted), 0.8);
+}
+
+.hero-metric__value {
+  font-size: clamp(2.8rem, 5vw, 3.4rem);
+  font-weight: 700;
+  color: rgb(var(--text));
+}
+
+html[data-theme="dark"] .hero-metric__value {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.hero-metric__description {
+  font-size: 0.9rem;
+  color: rgba(var(--text-soft), 0.8);
+}
+
+.hero-metric__meta {
+  color: rgba(var(--text-muted), 0.85);
+}
+
+html[data-theme="dark"] .hero-metric__meta {
+  color: rgba(var(--text-muted), 0.8);
+}
+
+.hero-metric__status-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: rgba(var(--success), 0.85);
+  box-shadow: 0 0 0 2px rgba(var(--success), 0.25);
+}
+
 .stat-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));

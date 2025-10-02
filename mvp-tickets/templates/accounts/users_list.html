@@ -17,16 +17,16 @@
 
   <section class="grid gap-6 lg:grid-cols-[minmax(0,18rem)_1fr]">
     <aside class="space-y-6">
-      <article class="surface-panel bg-slate-900/60">
-        <h2 class="text-xl font-semibold text-white">Filtros</h2>
-        <p class="mt-1 text-sm text-slate-300">Filtra por actividad, grupo o busca por nombre para encontrar rápido a la persona correcta.</p>
+      <article class="surface-panel surface-panel--contrast">
+        <h2 class="heading-md text-contrast">Filtros</h2>
+        <p class="text-sm text-contrast-soft">Filtra por actividad, grupo o busca por nombre para encontrar rápido a la persona correcta.</p>
         <form method="get" class="mt-4 space-y-4 text-sm">
           <div class="space-y-2">
-            <label class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400" for="buscar-usuario">Buscar</label>
+            <label class="text-xs font-semibold uppercase tracking-[0.2em] text-muted-soft" for="buscar-usuario">Buscar</label>
             <input id="buscar-usuario" name="q" value="{{ filters.q }}" class="input" placeholder="usuario, nombre, email" />
           </div>
           <div class="space-y-2">
-            <label class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400" for="activo">Activo</label>
+            <label class="text-xs font-semibold uppercase tracking-[0.2em] text-muted-soft" for="activo">Activo</label>
             <select id="activo" name="active" class="input">
               <option value="" {% if not filters.active %}selected{% endif %}>(Todos)</option>
               <option value="1" {% if filters.active == "1" %}selected{% endif %}>Sí</option>
@@ -34,7 +34,7 @@
             </select>
           </div>
           <div class="space-y-2">
-            <label class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400" for="grupo">Grupo</label>
+            <label class="text-xs font-semibold uppercase tracking-[0.2em] text-muted-soft" for="grupo">Grupo</label>
             <select id="grupo" name="group" class="input">
               <option value="" {% if not filters.group %}selected{% endif %}>(Todos)</option>
               {% for g in groups %}
@@ -48,14 +48,14 @@
           </div>
         </form>
       </article>
-      <p class="surface-panel bg-slate-900/40 p-4 text-xs text-slate-300">Consejo: documenta los cambios de roles para mantener trazabilidad.</p>
+      <p class="surface-note text-xs">Consejo: documenta los cambios de roles para mantener trazabilidad.</p>
     </aside>
 
     <div class="space-y-4">
-      <article class="surface-panel bg-slate-900/60">
-        <div class="flex flex-col gap-3 border-b border-slate-700/40 pb-4 sm:flex-row sm:items-center sm:justify-between">
-          <h2 class="text-xl font-semibold text-white">Listado de usuarios</h2>
-          <p class="text-xs text-slate-400">Haz clic en editar para actualizar datos o gestionar accesos.</p>
+      <article class="surface-panel surface-panel--contrast">
+        <div class="panel-header flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <h2 class="heading-md text-contrast">Listado de usuarios</h2>
+          <p class="text-xs text-contrast-soft">Haz clic en editar para actualizar datos o gestionar accesos.</p>
         </div>
         <div class="mt-4 overflow-x-auto">
           <table class="table text-sm">
@@ -72,29 +72,29 @@
             <tbody>
               {% for u in users %}
               <tr>
-                <td class="td font-semibold text-white">{{ u.username }}</td>
-                <td class="td text-slate-200">{{ u.first_name }} {{ u.last_name }}</td>
-                <td class="td text-slate-300">{{ u.email }}</td>
+                <td class="td font-semibold">{{ u.username }}</td>
+                <td class="td text-muted">{{ u.first_name }} {{ u.last_name }}</td>
+                <td class="td text-muted-soft">{{ u.email }}</td>
                 <td class="td">
                   <div class="flex flex-wrap gap-2">
                     {% for g in u.groups.all %}
-                      <span class="inline-flex items-center gap-2 rounded-full border border-slate-600/40 bg-slate-500/20 px-3 py-1 text-xs font-medium text-slate-200"><i class="bi bi-shield-check text-indigo-200"></i>{{ g.name }}</span>
+                      <span class="pill pill--muted text-xs"><i class="bi bi-shield-check text-accent"></i>{{ g.name }}</span>
                     {% empty %}
-                      <span class="text-xs text-slate-500">—</span>
+                      <span class="text-xs text-muted-soft">—</span>
                     {% endfor %}
                   </div>
                 </td>
                 <td class="td">
                   {% if u.is_active %}
-                    <span class="inline-flex items-center gap-2 rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-200"><i class="bi bi-check-circle"></i>Activo</span>
+                    <span class="pill pill--success text-xs"><i class="bi bi-check-circle"></i>Activo</span>
                   {% else %}
-                    <span class="inline-flex items-center gap-2 rounded-full bg-rose-500/15 px-3 py-1 text-xs font-semibold text-rose-200"><i class="bi bi-x-circle"></i>Inactivo</span>
+                    <span class="pill pill--danger text-xs"><i class="bi bi-x-circle"></i>Inactivo</span>
                   {% endif %}
                 </td>
                 <td class="td">
                   <div class="flex flex-wrap items-center gap-3 text-xs font-semibold">
-                    <a class="text-indigo-200 hover:text-white" href="{% url 'accounts:user_edit' u.id %}"><i class="bi bi-pencil"></i> Editar</a>
-                    <a class="text-slate-400 hover:text-rose-300"
+                    <a class="text-accent hover:underline" href="{% url 'accounts:user_edit' u.id %}"><i class="bi bi-pencil"></i> Editar</a>
+                    <a class="text-muted-soft hover:text-danger"
                        href="{% url 'accounts:user_toggle' u.id %}"
                        onclick="return confirm('¿Seguro? Cambiarás el estado de este usuario.');">
                       <i class="bi bi-arrow-repeat"></i> {{ u.is_active|yesno:"Desactivar,Activar" }}
@@ -104,7 +104,7 @@
               </tr>
               {% empty %}
               <tr>
-                <td class="td text-center text-sm text-slate-400" colspan="6">Sin resultados por ahora.</td>
+                <td class="td text-center text-sm text-muted-soft" colspan="6">Sin resultados por ahora.</td>
               </tr>
               {% endfor %}
             </tbody>

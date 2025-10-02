@@ -256,18 +256,23 @@
   window.addEventListener('mousedown',()=>{ if(tabbed){ tabbed=false; document.body.classList.remove('user-tabbed'); } });
 
   // Skip link + landmark main sin tocar templates
-  (function injectSkipLink(){
+  (function ensureSkipLink(){
     const id='main-content';
     let main = document.querySelector('main,[role="main"]');
     if(!main){
       main=document.createElement('div'); main.id=id; main.setAttribute('role','main'); main.tabIndex=-1;
       document.body.insertBefore(main, document.body.firstChild);
     }else if(!main.id){ main.id=id; }
+
+    const existing = document.querySelector('.skip-link');
+    if(existing){
+      if(!existing.getAttribute('href')) existing.setAttribute('href','#'+main.id);
+      return;
+    }
+
     const skip=document.createElement('a');
     skip.href='#'+main.id; skip.textContent='Saltar al contenido';
-    skip.style.cssText='position:fixed;left:-999px;top:auto;width:1px;height:1px;overflow:hidden;z-index:1000;background:#fff;padding:.5rem .75rem;border-radius:.5rem;border:1px solid #cbd5e1';
-    skip.addEventListener('focus',()=>{skip.style.left='1rem'; skip.style.top='1rem'; skip.style.width='auto'; skip.style.height='auto';});
-    skip.addEventListener('blur',()=>{skip.style.left='-999px'; skip.style.width='1px'; skip.style.height='1px';});
+    skip.className='skip-link';
     document.body.insertBefore(skip, document.body.firstChild);
   })();
 

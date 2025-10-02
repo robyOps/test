@@ -4,27 +4,29 @@
   <meta charset="utf-8"/>
   <title>Reporte de Tickets</title>
   <style>
-    body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 12px; color: #111; }
-    h1 { font-size: 18px; margin: 0 0 8px 0; }
-    h2 { font-size: 14px; margin: 16px 0 6px 0; }
-    .muted { color: #555; }
-    .box { border: 1px solid #ddd; padding: 8px; border-radius: 6px; margin-bottom: 10px; }
-    table { width: 100%; border-collapse: collapse; margin: 6px 0 12px 0; }
-    th, td { border: 1px solid #ddd; padding: 6px; }
-    th { background: #f2f2f2; text-align: left; }
-    .grid-2 { width: 100%; }
-    .col { width: 48%; display: inline-block; vertical-align: top; }
+    body { font-family: 'DejaVu Sans', Arial, sans-serif; font-size: 12px; color: #0f172a; margin: 32px; background: #f8fafc; }
+    h1 { font-size: 20px; margin: 0 0 8px; color: #0b1120; }
+    h2 { font-size: 14px; margin: 18px 0 8px; color: #1e293b; }
+    .muted { color: #64748b; margin-bottom: 18px; }
+    .summary { border-radius: 16px; border: 1px solid #c7d2fe; background: linear-gradient(135deg, rgba(129, 140, 248, 0.18), rgba(56, 189, 248, 0.12)); padding: 16px; margin-bottom: 16px; }
+    .summary strong { color: #0f172a; }
+    table { width: 100%; border-collapse: collapse; margin: 8px 0 18px; }
+    th, td { border: 1px solid #cbd5f5; padding: 8px; text-align: left; }
+    th { background: #e0e7ff; color: #1e293b; font-weight: 700; }
+    .grid { display: flex; gap: 16px; }
+    .grid > div { flex: 1; }
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 999px; background: rgba(59, 130, 246, 0.12); color: #1d4ed8; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 6px; }
   </style>
 </head>
 <body>
-
+  <div class="badge">Coyahue Helpdesk</div>
   <h1>Reporte de Tickets</h1>
   <div class="muted">
-    Generado: {{ now|date:"Y-m-d H:i" }} — Usuario: {{ user.username }}
-    {% if from or to %}<br/>Rango: {{ from|default:"(inicio)" }} → {{ to|default:"(hoy)" }}{% endif %}
+    Generado: {{ now|date:"Y-m-d H:i" }} — Usuario: {{ user.username }}<br/>
+    {% if from or to %}Rango: {{ from|default:"(inicio)" }} → {{ to|default:"(hoy)" }}{% endif %}
   </div>
 
-  <div class="box">
+  <div class="summary">
     <strong>Total de tickets:</strong> {{ total }}<br/>
     <strong>Promedio de resolución (horas):</strong> {{ avg_hours|default:"—" }}
   </div>
@@ -41,8 +43,8 @@
     </tbody>
   </table>
 
-  <div class="grid-2">
-    <div class="col">
+  <div class="grid">
+    <div>
       <h2>Por categoría</h2>
       <table>
         <thead><tr><th>Categoría</th><th>Cantidad</th></tr></thead>
@@ -53,8 +55,7 @@
         </tbody>
       </table>
     </div>
-
-    <div class="col">
+    <div>
       <h2>Por prioridad</h2>
       <table>
         <thead><tr><th>Prioridad</th><th>Cantidad</th></tr></thead>
@@ -76,6 +77,5 @@
       {% empty %}<tr><td colspan="2">Sin datos</td></tr>{% endfor %}
     </tbody>
   </table>
-
 </body>
 </html>

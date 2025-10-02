@@ -1,113 +1,113 @@
 {% extends "base.html" %}
 {% block title %}Logs{% endblock %}
 {% block content %}
-<div class="space-y-8">
-  <header class="rounded-3xl border border-indigo-100 bg-gradient-to-br from-indigo-600 via-blue-500 to-sky-400 p-6 text-white shadow">
-    <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-      <div class="space-y-2">
-        <p class="inline-flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.35em]">Auditoría</p>
-        <h1 class="text-3xl font-bold tracking-tight">Logs</h1>
-        <p class="max-w-2xl text-sm text-blue-100">Revisa cada acción relevante del helpdesk. Filtra por usuario, recurso o rango de fechas.</p>
+<section class="page-section">
+  <header class="surface-panel">
+    <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+      <div class="space-y-4">
+        <span class="page-eyebrow">Auditoría</span>
+        <h1 class="page-title">Logs</h1>
+        <p class="page-subtitle">Revisa cada acción relevante del helpdesk. Filtra por usuario, recurso o rango de fechas.</p>
       </div>
-      <span class="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.25em] text-white/80"><i class="bi bi-archive"></i> {{ page_obj.paginator.count }} eventos</span>
+      <span class="inline-flex items-center gap-2 rounded-full border border-slate-500/40 bg-slate-600/30 px-4 py-2 text-xs font-semibold uppercase tracking-[0.25em] text-slate-200"><i class="bi bi-archive"></i> {{ page_obj.paginator.count }} eventos</span>
     </div>
   </header>
 
   <section class="grid gap-6 lg:grid-cols-[minmax(0,18rem)_1fr]">
     <aside>
-      <form method="get" class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-4 text-sm">
-        <h2 class="text-lg font-semibold text-slate-900">Filtrar registros</h2>
-        <p class="text-xs text-slate-500">Combina los filtros para encontrar cambios específicos.</p>
-        <div class="space-y-1">
-          <label class="text-xs font-semibold uppercase text-slate-500" for="f-actor">Actor</label>
-          <input id="f-actor" type="text" name="actor" value="{{ filters.actor }}" placeholder="Usuario" class="w-full rounded-xl border border-slate-200 px-3 py-2 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100" />
+      <form method="get" class="surface-panel bg-slate-900/60 space-y-4 text-sm">
+        <h2 class="text-lg font-semibold text-white">Filtrar registros</h2>
+        <p class="text-xs text-slate-400">Combina los filtros para encontrar cambios específicos.</p>
+        <div class="space-y-2">
+          <label class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400" for="f-actor">Actor</label>
+          <input id="f-actor" type="text" name="actor" value="{{ filters.actor }}" placeholder="Usuario" class="input" />
         </div>
-        <div class="space-y-1">
-          <label class="text-xs font-semibold uppercase text-slate-500" for="f-action">Acción</label>
-          <input id="f-action" type="text" name="action" value="{{ filters.action }}" placeholder="Creación, actualización" class="w-full rounded-xl border border-slate-200 px-3 py-2 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100" />
+        <div class="space-y-2">
+          <label class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400" for="f-action">Acción</label>
+          <input id="f-action" type="text" name="action" value="{{ filters.action }}" placeholder="Creación, actualización" class="input" />
         </div>
-        <div class="space-y-1">
-          <label class="text-xs font-semibold uppercase text-slate-500" for="f-resource">Recurso</label>
-          <input id="f-resource" type="text" name="resource" value="{{ filters.resource }}" placeholder="Ticket, usuario" class="w-full rounded-xl border border-slate-200 px-3 py-2 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100" />
+        <div class="space-y-2">
+          <label class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400" for="f-resource">Recurso</label>
+          <input id="f-resource" type="text" name="resource" value="{{ filters.resource }}" placeholder="Ticket, usuario" class="input" />
         </div>
-        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div class="space-y-1">
-            <label class="text-xs font-semibold uppercase text-slate-500" for="f-from">Desde</label>
-            <input id="f-from" type="date" name="from" value="{{ filters.from }}" class="w-full rounded-xl border border-slate-200 px-3 py-2 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100" />
+        <div class="grid gap-3 sm:grid-cols-2">
+          <div class="space-y-2">
+            <label class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400" for="f-from">Desde</label>
+            <input id="f-from" type="date" name="from" value="{{ filters.from }}" class="input" />
           </div>
-          <div class="space-y-1">
-            <label class="text-xs font-semibold uppercase text-slate-500" for="f-to">Hasta</label>
-            <input id="f-to" type="date" name="to" value="{{ filters.to }}" class="w-full rounded-xl border border-slate-200 px-3 py-2 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100" />
+          <div class="space-y-2">
+            <label class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400" for="f-to">Hasta</label>
+            <input id="f-to" type="date" name="to" value="{{ filters.to }}" class="input" />
           </div>
         </div>
         <input type="hidden" name="obj_id" value="{{ filters.obj_id }}" />
         {% if filters.model %}
         <input type="hidden" name="model" value="{{ filters.model }}" />
         {% endif %}
-        <div class="flex flex-wrap items-center gap-2 pt-2">
-          <button class="btn inline-flex items-center gap-2 rounded-full bg-indigo-600 px-4 py-2 font-semibold text-white shadow hover:bg-indigo-700" type="submit"><i class="bi bi-funnel"></i> Filtrar</button>
-          <a href="{% url 'logs_list' %}" class="btn inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 font-semibold text-slate-600 hover:border-indigo-200 hover:text-indigo-600"><i class="bi bi-eraser"></i> Limpiar</a>
+        <div class="flex flex-wrap items-center gap-3 pt-2">
+          <button class="btn btn-primary" type="submit"><i class="bi bi-funnel"></i> Filtrar</button>
+          <a href="{% url 'logs_list' %}" class="btn btn-ghost"><i class="bi bi-eraser"></i> Limpiar</a>
         </div>
       </form>
     </aside>
 
-    <article class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-      <div class="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-        <h2 class="text-lg font-semibold text-slate-900">Historial de acciones</h2>
-        <p class="text-xs text-slate-500">Ordenado del más reciente al más antiguo.</p>
+    <article class="surface-panel bg-slate-900/60 space-y-4">
+      <div class="flex flex-col gap-3 border-b border-slate-700/40 pb-4 sm:flex-row sm:items-center sm:justify-between">
+        <h2 class="text-xl font-semibold text-white">Historial de acciones</h2>
+        <p class="text-xs text-slate-400">Ordenado del más reciente al más antiguo.</p>
       </div>
       <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-slate-100 text-sm">
-          <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-600">
+        <table class="table text-sm">
+          <thead>
             <tr>
-              <th scope="col" class="px-4 py-3 text-left">Fecha</th>
-              <th scope="col" class="px-4 py-3 text-left">Actor</th>
-              <th scope="col" class="px-4 py-3 text-left">Tipo</th>
-              <th scope="col" class="px-4 py-3 text-left">ID</th>
-              <th scope="col" class="px-4 py-3 text-left">Acción</th>
-              <th scope="col" class="px-4 py-3 text-left">Mensaje</th>
+              <th scope="col" class="th">Fecha</th>
+              <th scope="col" class="th">Actor</th>
+              <th scope="col" class="th">Tipo</th>
+              <th scope="col" class="th">ID</th>
+              <th scope="col" class="th">Acción</th>
+              <th scope="col" class="th">Mensaje</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-100">
+          <tbody>
             {% for row in rows %}
-            <tr class="transition hover:bg-slate-50">
-              <td class="px-4 py-3 text-slate-500">{{ row.created_at }}</td>
-              <td class="px-4 py-3 font-medium text-slate-800">{{ row.actor }}</td>
-              <td class="px-4 py-3 text-slate-600">{{ row.model }}</td>
-              <td class="px-4 py-3">
+            <tr>
+              <td class="td text-slate-300">{{ row.created_at }}</td>
+              <td class="td font-semibold text-white">{{ row.actor }}</td>
+              <td class="td text-slate-300">{{ row.model }}</td>
+              <td class="td">
                 {% if row.url %}
-                  <a href="{{ row.url }}" class="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800">
+                  <a href="{{ row.url }}" class="inline-flex items-center gap-1 text-xs font-semibold text-indigo-200 hover:text-white">
                     <i class="bi bi-link-45deg"></i>{{ row.obj_id }}
                   </a>
                 {% else %}
-                  <span class="text-xs text-slate-500">{{ row.obj_id }}</span>
+                  <span class="text-xs text-slate-400">{{ row.obj_id }}</span>
                 {% endif %}
               </td>
-              <td class="px-4 py-3 text-slate-600">{{ row.action }}</td>
-              <td class="px-4 py-3 text-slate-600">{{ row.message }}</td>
+              <td class="td text-slate-300">{{ row.action }}</td>
+              <td class="td text-slate-200">{{ row.message }}</td>
             </tr>
             {% empty %}
             <tr>
-              <td colspan="6" class="px-4 py-6 text-center text-sm text-slate-500">Sin registros para los filtros seleccionados.</td>
+              <td colspan="6" class="td text-center text-sm text-slate-400">Sin registros para los filtros seleccionados.</td>
             </tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
-      <div class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 px-6 py-4 text-xs text-slate-500">
+      <div class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-700/40 pt-4 text-xs text-slate-400">
         <div>
-          Página <span class="font-semibold text-slate-700">{{ page_obj.number }}</span> de {{ page_obj.paginator.num_pages }}
+          Página <span class="font-semibold text-white">{{ page_obj.number }}</span> de {{ page_obj.paginator.num_pages }}
         </div>
         <div class="flex items-center gap-2">
           {% if page_obj.has_previous %}
-            <a href="?page={{ page_obj.previous_page_number }}&{{ querystring }}" class="inline-flex items-center gap-1 rounded-full border border-slate-200 px-3 py-1 font-semibold text-slate-600 hover:border-indigo-200 hover:text-indigo-600"><i class="bi bi-arrow-left"></i> Anterior</a>
+            <a href="?page={{ page_obj.previous_page_number }}&{{ querystring }}" class="btn btn-ghost"><i class="bi bi-arrow-left"></i> Anterior</a>
           {% endif %}
           {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}&{{ querystring }}" class="inline-flex items-center gap-1 rounded-full border border-slate-200 px-3 py-1 font-semibold text-slate-600 hover:border-indigo-200 hover:text-indigo-600">Siguiente <i class="bi bi-arrow-right"></i></a>
+            <a href="?page={{ page_obj.next_page_number }}&{{ querystring }}" class="btn btn-ghost">Siguiente <i class="bi bi-arrow-right"></i></a>
           {% endif %}
         </div>
       </div>
     </article>
   </section>
-</div>
+</section>
 {% endblock %}

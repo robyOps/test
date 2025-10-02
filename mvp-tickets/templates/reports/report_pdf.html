@@ -4,23 +4,21 @@
 <meta charset="utf-8">
 <title>Reporte de Tickets</title>
 <style>
-  body { font-family: DejaVu Sans, Arial, Helvetica, sans-serif; font-size: 12px; }
-  h1 { font-size: 18px; margin: 0 0 8px 0; }
-  h2 { font-size: 14px; margin: 16px 0 6px 0; }
-  .muted { color: #555; }
-  table { width: 100%; border-collapse: collapse; margin-top: 6px; }
-  th, td { border: 1px solid #ccc; padding: 6px; }
-  th { background: #f0f0f0; text-align: left; }
-  .kpi { margin: 8px 0; }
+  body { font-family: 'DejaVu Sans', Arial, Helvetica, sans-serif; font-size: 12px; color: #0f172a; margin: 28px; background: #f8fafc; }
+  h1 { font-size: 20px; margin: 0 0 8px; color: #0b1120; }
+  h2 { font-size: 14px; margin: 18px 0 8px; color: #1e293b; }
+  .muted { color: #64748b; margin-bottom: 12px; }
+  .kpi { border-radius: 12px; border: 1px solid #cbd5f5; padding: 12px; background: rgba(224, 231, 255, 0.5); margin: 10px 0; }
+  table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  th, td { border: 1px solid #dbeafe; padding: 7px; }
+  th { background: #e0e7ff; text-align: left; color: #1e293b; font-weight: 700; }
 </style>
 </head>
 <body>
   <h1>Reporte de Tickets</h1>
   <div class="muted">
     Generado: {{ generated_at|date:"Y-m-d H:i" }}
-    {% if from or to %} · Rango:
-      {% if from %}{{ from }}{% else %}—{% endif %} → {% if to %}{{ to }}{% else %}—{% endif %}
-    {% endif %}
+    {% if from or to %} · Rango: {% if from %}{{ from }}{% else %}—{% endif %} → {% if to %}{{ to }}{% else %}—{% endif %}{% endif %}
   </div>
 
   <div class="kpi"><strong>Total:</strong> {{ total }}</div>

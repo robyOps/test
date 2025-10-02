@@ -19,18 +19,18 @@
         <a href="{% url 'reports_export_excel' %}?from={{ from }}&to={{ to }}&type={{ report_type }}&tech={{ tech_selected }}" class="btn btn-ghost"><i class="bi bi-file-earmark-spreadsheet"></i> Exportar Excel</a>
       </div>
     </div>
-    <form method="get" class="surface-panel bg-slate-900/70 shadow-inner">
+    <form method="get" class="surface-panel surface-panel--contrast">
       <div class="grid gap-4 text-sm md:grid-cols-5">
         <div class="flex flex-col gap-2">
-          <label class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-300">Desde</label>
+          <label class="text-xs font-semibold uppercase tracking-[0.2em] text-muted-soft">Desde</label>
           <input type="date" name="from" value="{{ from }}" class="input" />
         </div>
         <div class="flex flex-col gap-2">
-          <label class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-300">Hasta</label>
+          <label class="text-xs font-semibold uppercase tracking-[0.2em] text-muted-soft">Hasta</label>
           <input type="date" name="to" value="{{ to }}" class="input" />
         </div>
         <div class="flex flex-col gap-2">
-          <label class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-300">Tipo de reporte</label>
+          <label class="text-xs font-semibold uppercase tracking-[0.2em] text-muted-soft">Tipo de reporte</label>
           <select name="type" class="input">
             <option value="total" {% if report_type == 'total' %}selected{% endif %}>Total</option>
             <option value="categoria" {% if report_type == 'categoria' %}selected{% endif %}>Por categoría</option>
@@ -40,7 +40,7 @@
           </select>
         </div>
         <div class="flex flex-col gap-2">
-          <label class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-300">Técnico</label>
+          <label class="text-xs font-semibold uppercase tracking-[0.2em] text-muted-soft">Técnico</label>
           <select name="tech" class="input">
             <option value="" {% if not tech_selected %}selected{% endif %}>(Todos)</option>
             {% for t in techs %}
@@ -57,30 +57,30 @@
   </header>
 
   <section class="grid gap-5 md:grid-cols-3">
-    <article class="surface-panel bg-gradient-to-br from-sky-500/20 via-slate-900/40 to-indigo-500/20 space-y-3">
-      <div class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-200">Tickets totales</div>
-      <div class="text-4xl font-bold text-white">{{ total }}</div>
-      <div class="space-y-1 text-sm text-slate-200/80">
+    <article class="stat-card">
+      <span class="stat-card__label">Tickets totales</span>
+      <span class="stat-card__value">{{ total }}</span>
+      <div class="space-y-1 text-sm text-muted">
         {% for k,v in by_status.items %}
         <div class="flex items-center justify-between">
           <span>{{ k }}</span>
-          <span class="font-semibold text-white">{{ v }}</span>
+          <span class="font-semibold text-contrast">{{ v }}</span>
         </div>
         {% endfor %}
       </div>
     </article>
-    <article class="surface-panel bg-gradient-to-br from-emerald-500/20 via-slate-900/40 to-sky-500/15 space-y-3">
-      <div class="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-100">Promedio de resolución (hrs)</div>
-      <div class="text-4xl font-bold text-white">{{ avg_hours|default:"—" }}</div>
-      <p class="text-sm text-slate-200/80">Tiempo medio desde la apertura hasta la resolución de tickets cerrados.</p>
+    <article class="stat-card">
+      <span class="stat-card__label">Promedio de resolución (hrs)</span>
+      <span class="stat-card__value">{{ avg_hours|default:"—" }}</span>
+      <p class="text-sm text-muted">Tiempo medio desde la apertura hasta la resolución de tickets cerrados.</p>
     </article>
-    <article class="surface-panel bg-gradient-to-br from-amber-500/20 via-slate-900/40 to-rose-500/20 space-y-3">
-      <div class="text-xs font-semibold uppercase tracking-[0.3em] text-amber-100">Tickets por prioridad</div>
-      <ul class="space-y-1 text-sm text-slate-200">
+    <article class="stat-card">
+      <span class="stat-card__label">Tickets por prioridad</span>
+      <ul class="space-y-1 text-sm text-muted">
         {% for row in by_priority %}
         <li class="flex items-center justify-between">
           <span>{{ row.priority__name }}</span>
-          <span class="font-semibold text-white">{{ row.count }}</span>
+          <span class="font-semibold text-contrast">{{ row.count }}</span>
         </li>
         {% endfor %}
       </ul>
@@ -88,29 +88,29 @@
   </section>
 
   <section class="grid gap-6 lg:grid-cols-2">
-    <article class="surface-panel bg-slate-900/65">
-      <h2 class="text-lg font-semibold text-white">Por categoría</h2>
-      <p class="text-sm text-slate-300">Volumen de tickets según clasificación funcional.</p>
+    <article class="surface-panel surface-panel--muted">
+      <h2 class="heading-md text-contrast">Por categoría</h2>
+      <p class="text-sm text-muted">Volumen de tickets según clasificación funcional.</p>
       <div class="mt-4 h-64"><canvas id="chartCat"></canvas></div>
     </article>
-    <article class="surface-panel bg-slate-900/65">
-      <h2 class="text-lg font-semibold text-white">Por prioridad</h2>
-      <p class="text-sm text-slate-300">Distribución según la urgencia declarada.</p>
+    <article class="surface-panel surface-panel--muted">
+      <h2 class="heading-md text-contrast">Por prioridad</h2>
+      <p class="text-sm text-muted">Distribución según la urgencia declarada.</p>
       <div class="mt-4 h-64"><canvas id="chartPri"></canvas></div>
     </article>
-    <article class="surface-panel bg-slate-900/65">
-      <h2 class="text-lg font-semibold text-white">Por técnico</h2>
-      <p class="text-sm text-slate-300">Tickets asignados por responsable.</p>
+    <article class="surface-panel surface-panel--muted">
+      <h2 class="heading-md text-contrast">Por técnico</h2>
+      <p class="text-sm text-muted">Tickets asignados por responsable.</p>
       <div class="mt-4 h-64"><canvas id="chartTech"></canvas></div>
     </article>
-    <article class="surface-panel bg-slate-900/65">
-      <h2 class="text-lg font-semibold text-white">Horas de resolución</h2>
-      <p class="text-sm text-slate-300">Histograma de tiempos empleados en resolver incidencias.</p>
+    <article class="surface-panel surface-panel--muted">
+      <h2 class="heading-md text-contrast">Horas de resolución</h2>
+      <p class="text-sm text-muted">Histograma de tiempos empleados en resolver incidencias.</p>
       <div class="mt-4 h-64"><canvas id="chartHist"></canvas></div>
     </article>
-    <article class="surface-panel bg-slate-900/65 lg:col-span-2">
-      <h2 class="text-lg font-semibold text-white">Categorías más lentas</h2>
-      <p class="text-sm text-slate-300">Promedio de horas hasta el cierre por categoría.</p>
+    <article class="surface-panel surface-panel--muted lg:col-span-2">
+      <h2 class="heading-md text-contrast">Categorías más lentas</h2>
+      <p class="text-sm text-muted">Promedio de horas hasta el cierre por categoría.</p>
       <div class="mt-4 h-64"><canvas id="chartCatSlow"></canvas></div>
     </article>
   </section>
@@ -125,10 +125,18 @@
   {{ chart_hist|json_script:"chart_hist_data" }}
   {{ chart_cat_slow|json_script:"chart_cat_slow_data" }}
   <script>
-    const COLORS = [
-      "#60a5fa", "#a855f7", "#34d399", "#fbbf24", "#f87171",
-      "#22d3ee", "#f472b6", "#c084fc", "#facc15", "#38bdf8"
-    ];
+    const css = () => getComputedStyle(document.documentElement);
+    const color = (token, alpha = 1) => {
+      const name = token.startsWith('--') ? token : `--${token}`;
+      const value = css().getPropertyValue(name).trim();
+      if (!value) {
+        return alpha === 1 ? 'rgba(148, 163, 184, 1)' : `rgba(148, 163, 184, ${alpha})`;
+      }
+      return alpha === 1 ? `rgb(${value})` : `rgba(${value}, ${alpha})`;
+    };
+
+    const PALETTE_TOKENS = ['--accent', '--accent-strong', '--success', '--warning', '--danger', '--info', '--surface-contrast'];
+    const colorFor = (index, alpha = 1) => color(PALETTE_TOKENS[index % PALETTE_TOKENS.length], alpha);
 
     function parseData(id) {
       const el = document.getElementById(id);
@@ -144,8 +152,8 @@
       if (!canvas) return null;
       const ctx = canvas.getContext("2d");
       const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-      gradient.addColorStop(0, "rgba(99, 102, 241, 0.9)");
-      gradient.addColorStop(1, "rgba(56, 189, 248, 0.35)");
+      gradient.addColorStop(0, color('--accent-strong', 0.9));
+      gradient.addColorStop(1, color('--accent', 0.35));
 
       return new Chart(ctx, {
         type: "bar",
@@ -155,8 +163,8 @@
             {
               label: title,
               data: dataset.data,
-              backgroundColor: dataset.data.map((_, index) => COLORS[index % COLORS.length]),
-              borderColor: dataset.data.map((_, index) => COLORS[index % COLORS.length]),
+              backgroundColor: dataset.data.map((_, index) => colorFor(index, 0.85)),
+              borderColor: dataset.data.map((_, index) => colorFor(index, 0.95)),
               borderWidth: 1,
               borderRadius: 16,
               borderSkipped: false,
@@ -170,9 +178,11 @@
           plugins: {
             legend: { display: false },
             tooltip: {
-              backgroundColor: '#0f172acc',
-              titleColor: '#f8fafc',
-              bodyColor: '#f1f5f9',
+              backgroundColor: color('--surface', 0.94),
+              titleColor: color('--text'),
+              bodyColor: color('--text-soft'),
+              borderColor: color('--border', 0.4),
+              borderWidth: 1,
               cornerRadius: 14,
               padding: 12,
             }
@@ -180,11 +190,11 @@
           scales: {
             y: {
               beginAtZero: true,
-              ticks: { precision: decimals, color: '#cbd5f5' },
-              grid: { color: 'rgba(148, 163, 184, 0.25)' },
+              ticks: { precision: decimals, color: color('--text-muted', 0.75) },
+              grid: { color: color('--border', 0.35) },
             },
             x: {
-              ticks: { color: '#cbd5f5' },
+              ticks: { color: color('--text-muted', 0.75) },
               grid: { display: false },
             },
           },
@@ -198,10 +208,43 @@
     const hist = parseData("chart_hist_data");
     const slow = parseData("chart_cat_slow_data");
 
-    buildBar("chartCat", cat, "Por categoría");
-    buildBar("chartPri", pri, "Por prioridad");
-    buildBar("chartTech", tech, "Por técnico");
-    buildBar("chartHist", hist, "Horas de resolución (histograma)", { decimals: 1 });
-    buildBar("chartCatSlow", slow, "Categorías más lentas", { decimals: 1 });
+    const charts = [
+      buildBar("chartCat", cat, "Por categoría"),
+      buildBar("chartPri", pri, "Por prioridad"),
+      buildBar("chartTech", tech, "Por técnico"),
+      buildBar("chartHist", hist, "Horas de resolución (histograma)", { decimals: 1 }),
+      buildBar("chartCatSlow", slow, "Categorías más lentas", { decimals: 1 })
+    ].filter(Boolean);
+
+    const refreshCharts = () => {
+      charts.forEach((chart) => {
+        const dataset = chart.data.datasets[0];
+        dataset.backgroundColor = dataset.data.map((_, index) => colorFor(index, 0.85));
+        dataset.borderColor = dataset.data.map((_, index) => colorFor(index, 0.95));
+        const gradient = chart.ctx.createLinearGradient(0, 0, 0, chart.canvas.height);
+        gradient.addColorStop(0, color('--accent-strong', 0.9));
+        gradient.addColorStop(1, color('--accent', 0.35));
+        dataset.hoverBackgroundColor = gradient;
+
+        const tooltip = chart.options.plugins.tooltip;
+        tooltip.backgroundColor = color('--surface', 0.94);
+        tooltip.titleColor = color('--text');
+        tooltip.bodyColor = color('--text-soft');
+        tooltip.borderColor = color('--border', 0.4);
+
+        if (chart.options.scales?.y) {
+          chart.options.scales.y.ticks.color = color('--text-muted', 0.75);
+          chart.options.scales.y.grid.color = color('--border', 0.35);
+        }
+        if (chart.options.scales?.x) {
+          chart.options.scales.x.ticks.color = color('--text-muted', 0.75);
+        }
+
+        chart.update('none');
+      });
+    };
+
+    refreshCharts();
+    document.addEventListener('themechange', refreshCharts);
   </script>
 {% endblock %}

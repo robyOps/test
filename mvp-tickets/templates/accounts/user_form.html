@@ -15,66 +15,66 @@
     </div>
   </header>
 
-  <form method="post" class="surface-panel space-y-10 bg-slate-900/60">
+  <form method="post" class="surface-panel surface-panel--contrast space-y-10">
     {% csrf_token %}
 
     <section class="grid gap-6 md:grid-cols-2">
       <div class="space-y-2">
-        <label class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400" for="id_username">Usuario</label>
+        <label class="text-xs font-semibold uppercase tracking-[0.2em] text-muted-soft" for="id_username">Usuario</label>
         {{ form.username|add_class:"input" }}
-        {% if form.username.errors %}<div class="text-xs text-rose-400">{{ form.username.errors }}</div>{% endif %}
+        {% if form.username.errors %}<div class="text-xs text-danger">{{ form.username.errors }}</div>{% endif %}
       </div>
       <div class="space-y-2">
-        <label class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400" for="id_email">Email</label>
+        <label class="text-xs font-semibold uppercase tracking-[0.2em] text-muted-soft" for="id_email">Email</label>
         {{ form.email|add_class:"input" }}
-        {% if form.email.errors %}<div class="text-xs text-rose-400">{{ form.email.errors }}</div>{% endif %}
+        {% if form.email.errors %}<div class="text-xs text-danger">{{ form.email.errors }}</div>{% endif %}
       </div>
       <div class="space-y-2">
-        <label class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400" for="id_first_name">Nombre</label>
+        <label class="text-xs font-semibold uppercase tracking-[0.2em] text-muted-soft" for="id_first_name">Nombre</label>
         {{ form.first_name|add_class:"input" }}
       </div>
       <div class="space-y-2">
-        <label class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400" for="id_last_name">Apellido</label>
+        <label class="text-xs font-semibold uppercase tracking-[0.2em] text-muted-soft" for="id_last_name">Apellido</label>
         {{ form.last_name|add_class:"input" }}
       </div>
       <div class="space-y-2 md:col-span-2">
-        <label class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.25em] text-slate-300">
+        <label class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.25em] text-muted">
           {{ form.is_active }} Activo
         </label>
-        <p class="text-xs text-slate-400">Si lo desmarcas, el usuario no podrá iniciar sesión.</p>
+        <p class="text-xs text-muted-soft">Si lo desmarcas, el usuario no podrá iniciar sesión.</p>
       </div>
     </section>
 
     <section class="space-y-4">
-      <h2 class="text-lg font-semibold text-white">Grupos y roles</h2>
-      <div class="surface-panel bg-slate-800/60 p-5">
-        {{ form.groups|add_class:"grid gap-3 text-sm text-slate-200" }}
+      <h2 class="heading-md text-contrast">Grupos y roles</h2>
+      <div class="surface-panel surface-panel--muted surface-panel--compact">
+        {{ form.groups|add_class:"grid gap-3 text-sm text-muted" }}
       </div>
-      {% if form.groups.errors %}<div class="text-xs text-rose-400">{{ form.groups.errors }}</div>{% endif %}
-      <p class="text-xs text-slate-400">Puedes seleccionar múltiples roles según las responsabilidades del usuario.</p>
+      {% if form.groups.errors %}<div class="text-xs text-danger">{{ form.groups.errors }}</div>{% endif %}
+      <p class="text-xs text-muted-soft">Puedes seleccionar múltiples roles según las responsabilidades del usuario.</p>
     </section>
 
     {% if is_new %}
     <section class="grid gap-6 md:grid-cols-2">
       <div class="space-y-2">
-        <label class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400" for="id_password1">Contraseña</label>
+        <label class="text-xs font-semibold uppercase tracking-[0.2em] text-muted-soft" for="id_password1">Contraseña</label>
         {{ form.password1|add_class:"input" }}
-        {% if form.password1.errors %}<div class="text-xs text-rose-400">{{ form.password1.errors }}</div>{% endif %}
+        {% if form.password1.errors %}<div class="text-xs text-danger">{{ form.password1.errors }}</div>{% endif %}
       </div>
       <div class="space-y-2">
-        <label class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400" for="id_password2">Repite la contraseña</label>
+        <label class="text-xs font-semibold uppercase tracking-[0.2em] text-muted-soft" for="id_password2">Repite la contraseña</label>
         {{ form.password2|add_class:"input" }}
-        {% if form.password2.errors %}<div class="text-xs text-rose-400">{{ form.password2.errors }}</div>{% endif %}
+        {% if form.password2.errors %}<div class="text-xs text-danger">{{ form.password2.errors }}</div>{% endif %}
       </div>
     </section>
     {% else %}
     <section class="grid gap-6 md:grid-cols-2">
       <div class="space-y-2">
-        <label class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400" for="id_new_password1">Nueva contraseña (opcional)</label>
+        <label class="text-xs font-semibold uppercase tracking-[0.2em] text-muted-soft" for="id_new_password1">Nueva contraseña (opcional)</label>
         {{ form.new_password1|add_class:"input" }}
       </div>
       <div class="space-y-2">
-        <label class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400" for="id_new_password2">Repite la nueva contraseña</label>
+        <label class="text-xs font-semibold uppercase tracking-[0.2em] text-muted-soft" for="id_new_password2">Repite la nueva contraseña</label>
         {{ form.new_password2|add_class:"input" }}
       </div>
     </section>

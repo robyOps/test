@@ -18,11 +18,11 @@
   {% if roles %}
   <div class="grid gap-5 lg:grid-cols-2">
     {% for r in roles %}
-    <article class="surface-panel bg-slate-900/55 space-y-5">
+    <article class="surface-panel surface-panel--contrast space-y-5">
       <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div class="space-y-1">
-          <h2 class="text-xl font-semibold text-white">{{ r.name }}</h2>
-          <p class="text-sm text-slate-300">Permisos activos para este rol.</p>
+          <h2 class="heading-md text-contrast">{{ r.name }}</h2>
+          <p class="text-sm text-contrast-soft">Permisos activos para este rol.</p>
         </div>
         <a class="btn btn-ghost" href="{% url 'accounts:role_edit' r.id %}"><i class="bi bi-pencil"></i> Editar</a>
       </div>
@@ -30,14 +30,11 @@
         {% if perms %}
           <ul class="flex flex-wrap gap-2" role="list">
             {% for p in perms %}
-            <li class="inline-flex items-center gap-2 rounded-full border border-indigo-400/40 bg-indigo-500/15 px-3 py-1.5 text-xs font-medium text-indigo-100">
-              <i class="bi bi-check-circle-fill"></i>
-              {{ p|perm_label }}
-            </li>
+            <li class="pill pill--muted text-xs"><i class="bi bi-check-circle-fill text-accent"></i>{{ p|perm_label }}</li>
             {% endfor %}
           </ul>
         {% else %}
-          <p class="surface-panel bg-slate-900/40 px-5 py-4 text-sm text-slate-300">Este rol aún no tiene permisos asignados.</p>
+          <p class="surface-note text-sm">Este rol aún no tiene permisos asignados.</p>
         {% endif %}
       {% endwith %}
     </article>

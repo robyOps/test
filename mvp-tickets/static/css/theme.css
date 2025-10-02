@@ -1,0 +1,104 @@
+/* === 0) Capas para control de cascada === */
+@layer reset, tokens, base, components, utilities;
+
+/* === 1) Reset accesible === */
+@layer reset {
+  *,*::before,*::after{box-sizing:border-box}
+  html:focus-within{scroll-behavior:smooth}
+  body{margin:0; text-rendering:optimizeLegibility}
+  img,svg,video{max-width:100%; height:auto}
+  button,input,select,textarea{font:inherit}
+}
+
+/* === 2) Tokens claro/oscuro === */
+@layer tokens {
+  :root{
+    --bg:#ffffff; --fg:#0a0a0a; --muted:#6b7280;
+    --surface:#f6f8fa; --surface-2:#eef2f7; --border:#e5e7eb;
+    --primary:#1f6feb; --primary-fg:#ffffff;
+    --danger:#e11d48; --warning:#f59e0b; --success:#10b981; --info:#0ea5e9;
+    --focus:#7c3aed;
+    --radius:12px; --radius-sm:8px;
+    --shadow:0 1px 2px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.08);
+    --font: ui-sans-serif, system-ui, -apple-system,"Segoe UI",Roboto,Arial,"Helvetica Neue";
+    --kbd:#111827; --kbd-fg:#e5e7eb;
+  }
+  :root[data-theme="dark"], @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0b0f14; --fg:#e5e7eb; --muted:#9ca3af;
+      --surface:#0f172a; --surface-2:#111827; --border:#1f2937;
+      --primary:#58a6ff; --primary-fg:#061018;
+      --danger:#fb7185; --warning:#fbbf24; --success:#34d399; --info:#38bdf8;
+      --focus:#a78bfa; --kbd:#e5e7eb; --kbd-fg:#111827;
+    }
+  }
+}
+
+/* === 3) Base tipografía y layout sin tocar HTML === */
+@layer base {
+  html,body{background:var(--bg); color:var(--fg); font-family:var(--font); line-height:1.5}
+  a{color:var(--primary); text-decoration:none} a:hover{text-decoration:underline}
+  hr{border:0; border-top:1px solid var(--border); margin:1.25rem 0}
+  code,kbd,pre{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+  kbd{background:var(--kbd); color:var(--kbd-fg); padding:0 .4rem; border-radius:6px; font-size:.85em}
+  .container{max-width:1200px; margin:auto; padding:1rem}
+}
+
+/* === 4) Componentes por selectores genéricos === */
+@layer components {
+  /* Tarjetas y superficies */
+  .card, .panel, .box, article, section[role="region"]{
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--radius); box-shadow:var(--shadow); padding:1rem;
+  }
+
+  /* Botones existentes o nativos */
+  .btn, button, [role="button"]{
+    display:inline-flex; align-items:center; gap:.5rem;
+    padding:.6rem .9rem; border-radius:var(--radius-sm);
+    border:1px solid var(--border); background:var(--surface-2); color:var(--fg); cursor:pointer;
+  }
+  .btn.primary, button.primary, .btn[type="submit"]{background:var(--primary); color:var(--primary-fg); border-color:transparent}
+  .btn.danger{background:var(--danger); color:var(--primary-fg); border-color:transparent}
+  .btn:focus-visible, button:focus-visible{outline:2px solid var(--focus); outline-offset:2px}
+  .btn[disabled], button[disabled]{opacity:.6; cursor:not-allowed}
+
+  /* Inputs, selects, textareas */
+  input[type], select, textarea{
+    width:100%; padding:.55rem .7rem; border-radius:10px;
+    border:1px solid var(--border); background:var(--bg); color:var(--fg);
+  }
+  input:focus, select:focus, textarea:focus{outline:2px solid var(--focus); outline-offset:2px}
+
+  /* Tablas densas para tickets */
+  table{width:100%; border-collapse:separate; border-spacing:0}
+  thead th{position:sticky; top:0; background:var(--surface); text-align:left; font-weight:600; border-bottom:1px solid var(--border)}
+  td,th{padding:.65rem .75rem; border-bottom:1px solid var(--border)}
+  tbody tr:hover{background:color-mix(in oklab, var(--surface-2) 60%, transparent)}
+
+  /* Badges de estado/priority sin cambiar markup */
+  .badge, .tag, [data-badge]{
+    display:inline-block; padding:.15rem .5rem; border-radius:999px; font-size:.75rem;
+    border:1px solid var(--border); background:var(--surface-2)
+  }
+  .priority-high, .status-critical, [data-priority="high"]{background:color-mix(in oklab, var(--danger) 20%, transparent)}
+  .priority-med, [data-priority="medium"]{background:color-mix(in oklab, var(--warning) 25%, transparent)}
+  .priority-low, [data-priority="low"]{background:color-mix(in oklab, var(--success) 20%, transparent)}
+
+  /* Barra superior y sidebar comunes */
+  .navbar{background:var(--surface); border-bottom:1px solid var(--border); padding:.5rem 1rem}
+  .sidebar{background:var(--surface); border-right:1px solid var(--border); padding:1rem; border-radius:0}
+
+  /* Modales genéricos si ya existen */
+  .modal, [role="dialog"]{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow)}
+}
+
+/* === 5) Utilidades rápidas sin tocar vistas === */
+@layer utilities {
+  .muted{color:var(--muted)}
+  .pill{border-radius:999px}
+  .sr-only{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0}
+  .grid{display:grid; gap:1rem}
+  .grid-2{grid-template-columns: 1fr 1fr}
+  .nowrap{white-space:nowrap}
+}

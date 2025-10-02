@@ -1,355 +1,264 @@
-// Dark mode toggle
 (function(){
-  const root=document.documentElement;
-  const saved=localStorage.getItem("theme");
-  if(saved){ if(saved==="dark") root.classList.add("dark"); }
-  else if(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches){
-    root.classList.add("dark");
-  }
-  document.addEventListener("click",e=>{
-    const t=e.target.closest("#theme-toggle"); if(!t) return;
-    root.classList.toggle("dark");
-    localStorage.setItem("theme", root.classList.contains("dark")?"dark":"light");
-  });
-})();
+  'use strict';
 
-// HTMX indicator (if HTMX exists)
-(function(){
-  const ind=document.createElement("div");
-  ind.id="hx-indicator";
-  ind.style.cssText="position:fixed;bottom:1rem;right:1rem;padding:.5rem .75rem;border-radius:.75rem;border:1px solid rgba(148,163,184,.35);background:rgba(255,255,255,.9)";
-  ind.textContent="Cargando…"; ind.hidden=true; document.body.appendChild(ind);
-  document.body.setAttribute("hx-indicator","#hx-indicator");
-  document.addEventListener("htmx:beforeRequest",()=>{ind.hidden=false;});
-  document.addEventListener("htmx:afterOnLoad",()=>{ind.hidden=true;});
-  document.addEventListener("htmx:responseError",()=>{ind.hidden=true;});
-})();
+  const MODE_KEY = 'ui-theme-mode';
+  const ACCENT_KEY = 'ui-theme-accent';
+  const doc = document.documentElement;
 
-// Auto-upgrade de formularios y tablas sin tocar templates
-(function(){
-  const q = (sel,root=document)=>Array.from(root.querySelectorAll(sel));
-
-  function upgradeForms(root=document){
-    q('input:not([type="checkbox"]):not([type="radio"]):not([class*="input"])', root)
-      .forEach(el=>el.classList.add('input'));
-    q('select:not([class*="input"])', root).forEach(el=>el.classList.add('input'));
-    q('textarea:not([class*="input"])', root).forEach(el=>el.classList.add('input'));
-
-    q('button[type="submit"]:not([class*="btn"])', root).forEach(el=>{
-      el.classList.add('btn','btn-primary');
-    });
+  function applyMode(mode, persist = true) {
+    if (mode === 'dark') {
+      doc.classList.add('dark');
+    } else {
+      doc.classList.remove('dark');
+      mode = 'light';
+    }
+    if (persist) {
+      try { localStorage.setItem(MODE_KEY, mode); } catch (err) { /* ignore */ }
+    }
+    updateToggleState();
   }
 
-  function upgradeTables(root=document){
-    q('table:not([class*="table"])', root).forEach(t=>{
-      t.classList.add('table');
-      q('thead th', t).forEach(th=>th.classList.add('th'));
-      q('tbody td', t).forEach(td=>td.classList.add('td'));
-    });
+  function preferredMode() {
+    try {
+      const stored = localStorage.getItem(MODE_KEY);
+      if (stored) { return stored; }
+    } catch (err) { /* ignore */ }
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   }
 
-  // Evita doble submit y muestra estado de carga
-  function safeSubmits(root=document){
-    q('form', root).forEach(form=>{
-      if(form.__safeSubmitBound) return;
-      form.__safeSubmitBound = true;
-      form.addEventListener('submit', e=>{
-        const btn = form.querySelector('button[type="submit"].btn') || form.querySelector('button[type="submit"]');
-        if(btn && !btn.hasAttribute('aria-busy')){
-          btn.setAttribute('aria-busy','true');
-          btn.disabled = true;
-          setTimeout(()=>{ 
-            if(btn.getAttribute('aria-busy')==='true'){ btn.disabled=false; btn.removeAttribute('aria-busy'); }
-          }, 8000);
+  function applyAccent(theme, persist = true) {
+    if (!theme) { return; }
+    doc.setAttribute('data-theme', theme);
+    if (persist) {
+      try { localStorage.setItem(ACCENT_KEY, theme); } catch (err) { /* ignore */ }
+    }
+  }
+
+  function restorePreferences() {
+    applyMode(preferredMode(), false);
+    try {
+      const savedTheme = localStorage.getItem(ACCENT_KEY);
+      if (savedTheme) {
+        applyAccent(savedTheme, false);
+      } else if (!doc.dataset.theme) {
+        doc.dataset.theme = 'default';
+      }
+    } catch (err) {
+      if (!doc.dataset.theme) {
+        doc.dataset.theme = 'default';
+      }
+    }
+  }
+
+  function updateToggleState() {
+    const toggle = document.getElementById('theme-toggle');
+    if (!toggle) return;
+    const isDark = doc.classList.contains('dark');
+    toggle.setAttribute('aria-pressed', isDark ? 'true' : 'false');
+    toggle.setAttribute('data-mode', isDark ? 'dark' : 'light');
+    const label = isDark ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro';
+    toggle.setAttribute('aria-label', label);
+  }
+
+  function setupModeToggle() {
+    const prefers = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+    if (prefers) {
+      prefers.addEventListener('change', evt => {
+        try {
+          if (!localStorage.getItem(MODE_KEY)) {
+            applyMode(evt.matches ? 'dark' : 'light', false);
+          }
+        } catch (err) {
+          applyMode(evt.matches ? 'dark' : 'light', false);
         }
+      });
+    }
+
+    document.addEventListener('click', event => {
+      const toggle = event.target.closest('#theme-toggle');
+      if (!toggle) return;
+      event.preventDefault();
+      const next = doc.classList.contains('dark') ? 'light' : 'dark';
+      applyMode(next);
+    });
+  }
+
+  function ensureIndicator() {
+    if (!document.body || document.getElementById('hx-indicator')) return;
+    const indicator = document.createElement('div');
+    indicator.id = 'hx-indicator';
+    indicator.textContent = 'Cargando…';
+    indicator.setAttribute('role', 'status');
+    indicator.setAttribute('aria-live', 'polite');
+    indicator.hidden = true;
+    indicator.classList.add('hidden');
+    document.body.appendChild(indicator);
+    document.body.setAttribute('hx-indicator', '#hx-indicator');
+  }
+
+  function handleHTMXIndicators() {
+    ensureIndicator();
+    const indicator = document.getElementById('hx-indicator');
+    const body = document.body;
+    if (!indicator || !body) return;
+
+    const show = () => {
+      indicator.hidden = false;
+      indicator.classList.remove('hidden');
+      body.setAttribute('aria-busy', 'true');
+    };
+    const hide = () => {
+      indicator.hidden = true;
+      indicator.classList.add('hidden');
+      body.removeAttribute('aria-busy');
+    };
+
+    document.addEventListener('htmx:beforeRequest', show);
+    document.addEventListener('htmx:afterOnLoad', hide);
+    document.addEventListener('htmx:afterRequest', hide);
+    document.addEventListener('htmx:responseError', hide);
+  }
+
+  function autoEnhance(root) {
+    upgradeInputs(root);
+    upgradeButtons(root);
+    upgradeTables(root);
+  }
+
+  function upgradeInputs(root = document) {
+    const selector = 'input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not(.input), textarea:not(.input), select:not(.input)';
+    root.querySelectorAll(selector).forEach(el => {
+      el.classList.add('input');
+    });
+  }
+
+  function upgradeButtons(root = document) {
+    root.querySelectorAll('button').forEach(btn => {
+      if (!btn.classList.contains('btn')) {
+        btn.classList.add('btn');
+      }
+      if (btn.type === 'submit' && !btn.classList.contains('btn-primary')) {
+        btn.classList.add('btn-primary');
+      }
+    });
+    root.querySelectorAll('a[role="button"]:not(.btn)').forEach(link => {
+      link.classList.add('btn', 'btn-ghost');
+    });
+  }
+
+  function upgradeTables(root = document) {
+    root.querySelectorAll('table').forEach(table => {
+      if (!table.classList.contains('table')) {
+        table.classList.add('table');
+      }
+      table.querySelectorAll('thead th').forEach(th => {
+        th.classList.add('th');
+      });
+      table.querySelectorAll('tbody td').forEach(td => {
+        td.classList.add('td');
       });
     });
   }
 
-  function applyAll(root=document){ upgradeForms(root); upgradeTables(root); safeSubmits(root); }
+  const pendingButtons = new Set();
 
-  if(document.readyState!=='loading') applyAll(); else document.addEventListener('DOMContentLoaded', applyAll);
-  document.addEventListener('htmx:afterSwap', e=>applyAll(e.target));
-})();
-
-// ===== Stats / Cards (opt-in, no template rewrites obligatorios) =====
-(function(){
-  const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
-  function fmt(n){ const v=Number(n); return Number.isFinite(v)? v.toLocaleString(): n; }
-
-  function renderSparklines(root=document){
-    $$('.stat-card[data-series]', root).forEach(card=>{
-      if(card.__sparkBound) return; card.__sparkBound=true;
-      const series = String(card.dataset.series||"").split(/[,;\s]+/).map(x=>Number(x)).filter(x=>Number.isFinite(x));
-      if(!series.length) return;
-      const w=240,h=42,p=2, max=Math.max(...series), min=Math.min(...series);
-      const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-      svg.setAttribute('viewBox',`0 0 ${w} ${h}`); svg.classList.add('spark');
-      const path = document.createElementNS(svg.namespaceURI,'path');
-      const norm = v=> h - p - ((v-min)/(max-min||1))*(h-2*p);
-      const step = (w-2*p)/Math.max(series.length-1,1);
-      let d=`M ${p} ${norm(series[0]||0)}`;
-      series.forEach((v,i)=>{ if(i){ d+=` L ${p+i*step} ${norm(v)}`; } });
-      path.setAttribute('d', d);
-      path.setAttribute('fill','none'); path.setAttribute('stroke','currentColor'); path.setAttribute('stroke-width','2');
-      const g=document.createElementNS(svg.namespaceURI,'g'); g.setAttribute('opacity','.8'); g.appendChild(path);
-      svg.appendChild(g);
-      card.querySelector('.spark')?.remove();
-      card.appendChild(svg);
-    });
+  function lockButton(btn) {
+    if (!btn || pendingButtons.has(btn)) return;
+    btn.setAttribute('aria-busy', 'true');
+    btn.disabled = true;
+    pendingButtons.add(btn);
+    window.setTimeout(() => releaseButton(btn), 8000);
   }
 
-  function hydrateStats(root=document){
-    $$('.stat-card', root).forEach(card=>{
-      if(card.__hydrated) return; card.__hydrated=true;
-      const key = card.dataset.key || card.getAttribute('aria-label') || 'Métrica';
-      const val = card.dataset.value || card.textContent.trim();
-      const delta = card.dataset.delta;
-      const status = card.dataset.status;
-      const progress = Number(card.dataset.progress);
-
-      card.innerHTML = `
-        <div class="k">${key}</div>
-        <div class="v">${fmt(val)}</div>
-        <div class="row" style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap"></div>
-      `;
-
-      const row = card.querySelector('.row');
-      if(delta){
-        const dir = String(delta).trim().startsWith('-')?'down':'up';
-        const d = document.createElement('span');
-        d.className = `delta ${dir}`;
-        d.innerHTML = `${dir==='up'?'▲':'▼'} ${delta}`;
-        row.appendChild(d);
-      }
-      if(status){
-        const b = document.createElement('span');
-        b.className = `badge ${status}`;
-        b.textContent = status.toUpperCase();
-        row.appendChild(b);
-      }
-      if(Number.isFinite(progress)){
-        const bar = document.createElement('div'); bar.className='progress';
-        const i = document.createElement('i'); i.style.width = Math.max(0,Math.min(100,progress))+'%';
-        bar.appendChild(i); card.appendChild(bar);
-      }
-      if(card.dataset.series){ const ph = document.createElement('div'); ph.className='spark'; card.appendChild(ph); }
-    });
+  function releaseButton(btn) {
+    if (!btn || !pendingButtons.has(btn)) return;
+    btn.disabled = false;
+    btn.removeAttribute('aria-busy');
+    pendingButtons.delete(btn);
   }
 
-  function applyAll(root=document){ hydrateStats(root); renderSparklines(root); }
-  if(document.readyState!=='loading') applyAll(); else document.addEventListener('DOMContentLoaded', applyAll);
-  document.addEventListener('htmx:afterSwap', e=>applyAll(e.target));
-})();
-
-// ===== Listas y estados: chips, acentos y filtros sin tocar templates =====
-(function(){
-  const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
-  const norm=t=>String(t||"").toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu,"").trim();
-
-  const STATE_MAP=[
-    {keys:["abierto","open"], cls:"state-open", label:"Abierto", icon:"●"},
-    {keys:["en progreso","in progress","progreso"], cls:"state-inprog", label:"En progreso", icon:"◐"},
-    {keys:["pendiente","pending","en espera","waiting"], cls:"state-pending", label:"Pendiente", icon:"⏳"},
-    {keys:["cerrado","closed","resuelto","resolved"], cls:"state-closed", label:"Cerrado", icon:"✔"}
-  ];
-  const PRI_MAP=[
-    {keys:["alta","high","urgente","urgent","critico","critical","p1","sev1"], cls:"pri-high", label:"Alta"},
-    {keys:["media","medium","normal","p2","sev2"], cls:"pri-med", label:"Media"},
-    {keys:["baja","low","p3","sev3"], cls:"pri-low", label:"Baja"},
-  ];
-
-  function classify(text, map){
-    const t=norm(text);
-    for(const m of map){ if(m.keys.some(k=>t.includes(k))) return m; }
-    return null;
-  }
-
-  function markHeaders(table){
-    const ths=$$('thead th',table);
-    ths.forEach(th=>{
-      const t=norm(th.textContent);
-      if(/estado|status/.test(t)) th.classList.add('is-col-state');
-      if(/prioridad|priority/.test(t)) th.classList.add('is-col-priority');
-    });
-  }
-
-  function enhanceTable(table){
-    if(table.__enhanced) return; table.__enhanced=true;
-    markHeaders(table);
-    const headers=$$('thead th',table);
-    const stateIdx=headers.findIndex(th=>th.classList.contains('is-col-state'));
-    const priIdx=headers.findIndex(th=>th.classList.contains('is-col-priority'));
-
-    $$('tbody tr',table).forEach(tr=>{
-      tr.classList.add('row-accent');
-      const tds=$$('td',tr);
-
-      if(stateIdx>-1 && tds[stateIdx]){
-        const td=tds[stateIdx];
-        if(!td.querySelector('.state-chip')){
-          const raw = td.dataset.status || td.textContent;
-          const m = classify(raw, STATE_MAP);
-          if(m){
-            td.innerHTML = `<span class="state-chip ${m.cls}" aria-label="Estado">${m.icon} ${m.label}</span>`;
-          }
-        }
-      }
-
-      if(priIdx>-1 && tds[priIdx]){
-        const td=tds[priIdx];
-        const raw = td.dataset.priority || td.textContent;
-        const m = classify(raw, PRI_MAP);
-        if(m){
-          tr.classList.add(m.cls);
-          if(!td.querySelector('.chip')){
-            td.innerHTML = `<span class="chip ${m.cls==='pri-high'?'chip-err':m.cls==='pri-med'?'chip-warn':'chip-ok'}">${m.label}</span>`;
-          }
-        }
-      }
-    });
-
-    if(stateIdx>-1 && !table.__filtersAdded){
-      table.__filtersAdded=true;
-      const toolbar=document.createElement('div');
-      toolbar.className='table-toolbar';
-      const label=document.createElement('span'); label.textContent='Filtrar:';
-      toolbar.appendChild(label);
-      const allBtn=btn('Todos',()=>applyFilter(null));
-      toolbar.appendChild(allBtn);
-      STATE_MAP.forEach(s=>{
-        const b=btn(s.label,()=>applyFilter(s.cls));
-        toolbar.appendChild(b);
+  function safeSubmits(root = document) {
+    root.querySelectorAll('form').forEach(form => {
+      if (form.dataset.uiSafeSubmit) return;
+      form.dataset.uiSafeSubmit = 'true';
+      form.addEventListener('submit', event => {
+        const submitter = event.submitter || form.querySelector('button[type="submit"]');
+        lockButton(submitter);
       });
-      table.parentElement.insertBefore(toolbar, table);
+      form.addEventListener('reset', () => {
+        pendingButtons.forEach(releaseButton);
+      });
+    });
+  }
 
-      function btn(text, on){
-        const b=document.createElement('button');
-        b.type='button'; b.className='table-filter'; b.textContent=text;
-        b.addEventListener('click', on); return b;
+  function initSubmitReleaseListeners() {
+    document.addEventListener('htmx:afterRequest', () => {
+      pendingButtons.forEach(releaseButton);
+    });
+    document.addEventListener('htmx:responseError', () => {
+      pendingButtons.forEach(releaseButton);
+    });
+  }
+
+  function lazyImages(root = document) {
+    root.querySelectorAll('img').forEach(img => {
+      if (!img.hasAttribute('loading')) {
+        img.setAttribute('loading', 'lazy');
       }
-      function applyFilter(cls){
-        $$('tbody tr',table).forEach(tr=>{
-          if(cls==null){ tr.hidden=false; return; }
-          const td = stateIdx>-1 ? $$('td',tr)[stateIdx] : null;
-          const has = td && td.querySelector(`.${cls}`);
-          tr.hidden = !has;
+      if (!img.hasAttribute('decoding')) {
+        img.setAttribute('decoding', 'async');
+      }
+    });
+  }
+
+  function initThemePicker(root = document) {
+    root.querySelectorAll('[data-theme-picker]').forEach(el => {
+      if (el.dataset.uiThemePickerBound) return;
+      el.dataset.uiThemePickerBound = 'true';
+      if (el.tagName === 'SELECT') {
+        el.value = doc.dataset.theme || 'default';
+        el.addEventListener('change', () => applyAccent(el.value));
+      } else {
+        el.addEventListener('click', evt => {
+          const target = evt.target.closest('[data-theme-value]');
+          if (!target) return;
+          evt.preventDefault();
+          applyAccent(target.getAttribute('data-theme-value'));
         });
       }
-    }
-  }
-
-  function applyAll(root=document){
-    $$('table',root).forEach(enhanceTable);
-  }
-
-  if(document.readyState!=='loading') applyAll(); else document.addEventListener('DOMContentLoaded', applyAll);
-  document.addEventListener('htmx:afterSwap', e=>applyAll(e.target));
-})();
-// ===== A11y & Performance helpers =====
-(function(){
-  // Focus visible solo cuando se navega con Tab
-  let tabbed=false;
-  window.addEventListener('keydown',e=>{
-    if(e.key==='Tab' && !tabbed){ tabbed=true; document.body.classList.add('user-tabbed'); }
-  });
-  window.addEventListener('mousedown',()=>{ if(tabbed){ tabbed=false; document.body.classList.remove('user-tabbed'); } });
-
-  // Skip link + landmark main sin tocar templates
-  (function ensureSkipLink(){
-    const id='main-content';
-    let main = document.querySelector('main,[role="main"]');
-    if(!main){
-      main=document.createElement('div'); main.id=id; main.setAttribute('role','main'); main.tabIndex=-1;
-      document.body.insertBefore(main, document.body.firstChild);
-    }else if(!main.id){ main.id=id; }
-
-    const existing = document.querySelector('.skip-link');
-    if(existing){
-      if(!existing.getAttribute('href')) existing.setAttribute('href','#'+main.id);
-      return;
-    }
-
-    const skip=document.createElement('a');
-    skip.href='#'+main.id; skip.textContent='Saltar al contenido';
-    skip.className='skip-link';
-    document.body.insertBefore(skip, document.body.firstChild);
-  })();
-
-  // Marcar busy global y accesible durante HTMX
-  document.addEventListener('htmx:beforeRequest',()=>{ document.body.setAttribute('aria-busy','true'); });
-  document.addEventListener('htmx:afterOnLoad',()=>{ document.body.removeAttribute('aria-busy'); });
-  document.addEventListener('htmx:responseError',()=>{ document.body.removeAttribute('aria-busy'); });
-
-  // Lazy de imágenes existente sin tocar templates
-  function lazyImages(root=document){
-    root.querySelectorAll('img:not([loading])').forEach(img=>{ img.loading='lazy'; img.decoding='async'; });
-  }
-
-  // Tablas muy grandes: colapsar y expandir sin perder datos ni eventos
-  function tameHugeTables(root=document){
-    root.querySelectorAll('table').forEach(t=>{
-      if(t.__tamed) return;
-      const tb=t.tBodies && t.tBodies[0]; if(!tb) return;
-      const rows=[...tb.rows]; const N=rows.length; const LIMIT=200;
-      if(N<=LIMIT) return;
-      t.__tamed=true;
-      // Mantén primeras LIMIT filas
-      rows.slice(LIMIT).forEach(r=>r.hidden=true);
-      // Insertar control
-      const ctrl=document.createElement('div');
-      ctrl.style.cssText='text-align:center;margin:.5rem 0';
-      const btn=document.createElement('button');
-      btn.type='button'; btn.className='btn';
-      btn.textContent=`Mostrar más (${N-LIMIT})`;
-      btn.addEventListener('click',()=>{
-        rows.slice(LIMIT).forEach(r=>r.hidden=false);
-        btn.remove();
-      });
-      ctrl.appendChild(btn);
-      t.parentElement.insertBefore(ctrl, t.nextSibling);
     });
   }
 
-  // Progressive enhancement en idle y para fragmentos HTMX
-  function applyAll(root=document){ lazyImages(root); tameHugeTables(root); }
-  if('requestIdleCallback' in window){
-    requestIdleCallback(()=>applyAll());
-  }else{
-    setTimeout(()=>applyAll(),0);
-  }
-  document.addEventListener('htmx:afterSwap', e=>applyAll(e.target));
-})();
-// ===== Brand themes: [data-theme] on <html> with persistence =====
-(function(){
-  const root=document.documentElement;
-  const KEY='theme-brand';
-  const saved=localStorage.getItem(KEY);
-  if(saved) root.setAttribute('data-theme', saved);
-
-  // Delegated clicks for [data-pick-theme] buttons or .theme-dot
-  document.addEventListener('click', e=>{
-    const el = e.target.closest('[data-pick-theme], .theme-dot');
-    if(!el) return;
-    const theme = el.getAttribute('data-pick-theme') || el.getAttribute('data-theme');
-    if(!theme) return;
-    root.setAttribute('data-theme', theme);
-    localStorage.setItem(KEY, theme);
-  });
-
-  // Optional: inject minimal picker if container exists
-  function injectPicker(){
-    const host = document.querySelector('[data-theme-picker]');
-    if(!host || host.__bound) return; host.__bound=true;
-    host.classList.add('theme-picker');
-    const themes=['default','emerald','amber','rose','violet','slate'];
-    themes.forEach(t=>{
-      const b=document.createElement('button');
-      b.type='button'; b.className='theme-dot'; b.setAttribute('title', t);
-      b.setAttribute('data-pick-theme', t);
-      b.setAttribute('data-theme', t);
-      host.appendChild(b);
+  function initHTMXHooks() {
+    document.addEventListener('htmx:afterSwap', event => {
+      const root = event.target;
+      autoEnhance(root);
+      safeSubmits(root);
+      lazyImages(root);
+      initThemePicker(root);
     });
   }
-  if(document.readyState!=='loading') injectPicker(); else document.addEventListener('DOMContentLoaded', injectPicker);
+
+  function onReady(cb) {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', cb);
+    } else {
+      cb();
+    }
+  }
+
+  restorePreferences();
+  setupModeToggle();
+  initSubmitReleaseListeners();
+  initHTMXHooks();
+
+  onReady(() => {
+    ensureIndicator();
+    handleHTMXIndicators();
+    autoEnhance(document);
+    safeSubmits(document);
+    lazyImages(document);
+    initThemePicker(document);
+    updateToggleState();
+  });
 })();

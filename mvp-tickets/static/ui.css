@@ -1,0 +1,52 @@
+:root{
+  --bg:255 255 255;--fg:15 23 42;--muted:100 116 139;
+  --brand:59 130 246;--ok:5 150 105;--warn:245 158 11;--err:239 68 68;
+  --radius:1rem
+}
+.dark{
+  --bg:2 6 23;--fg:226 232 240;--muted:148 163 184;--brand:96 165 250
+}
+html{font-size:clamp(14px,1.05vw,16px)}
+body{background-color:rgb(var(--bg));color:rgb(var(--fg));}
+
+.card{border:1px solid rgba(148,163,184,.25);border-radius:var(--radius);
+  background:rgba(255,255,255,.75);backdrop-filter:saturate(140%) blur(6px);
+  box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.dark .card{background:rgba(2,6,23,.6)}
+
+.btn{display:inline-flex;gap:.5rem;align-items:center;font-weight:600;
+  padding:.5rem 1rem;border:1px solid rgba(148,163,184,.35);
+  border-radius:calc(var(--radius) - .25rem);transition:transform .06s ease}
+.btn:active{transform:translateY(1px)}
+.btn-primary{border-color:transparent;background:rgb(var(--brand));color:#fff}
+.btn-ghost{border-color:transparent;background:transparent}
+
+.input{width:100%;border:1px solid rgba(148,163,184,.45);background:#fff;
+  border-radius:calc(var(--radius) - .25rem);padding:.5rem .75rem}
+.input:focus{outline:2px solid rgba(59,130,246,.25);outline-offset:2px}
+.dark .input{background:rgba(255,255,255,.03)}
+
+.table{width:100%;border-collapse:separate;border-spacing:0}
+.table tr:nth-child(odd){background:rgba(148,163,184,.08)}
+.dark .table tr:nth-child(odd){background:rgba(255,255,255,.04)}
+.table tr:hover{background:rgba(148,163,184,.14)}
+.th{font-weight:600;color:rgb(var(--muted));text-align:left;padding:.75rem}
+.td{padding:.75rem;border-top:1px solid rgba(148,163,184,.25)}
+
+.chip{display:inline-flex;gap:.375rem;align-items:center;font-size:.75rem;
+  padding:.25rem .5rem;border-radius:999px}
+.chip-ok{background:rgba(5,150,105,.15);color:rgb(5,150,105)}
+.chip-warn{background:rgba(245,158,11,.18);color:rgb(245,158,11)}
+.chip-err{background:rgba(239,68,68,.15);color:rgb(239,68,68)}
+
+header.site{
+  position:sticky;top:0;z-index:50;backdrop-filter:blur(8px);
+  border-bottom:1px solid rgba(255,255,255,.2);
+  background:rgba(255,255,255,.7)
+}
+.dark header.site{background:rgba(2,6,23,.6)}
+
+.toast-wrap{position:fixed;top:1rem;right:1rem;display:grid;gap:.5rem}
+.toast{padding:.75rem 1rem}.toast-info{background:rgba(59,130,246,.15)}
+.toast-ok{background:rgba(5,150,105,.15)}.toast-warn{background:rgba(245,158,11,.18)}
+.toast-err{background:rgba(239,68,68,.15)}

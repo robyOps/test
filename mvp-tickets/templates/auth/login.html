@@ -4,37 +4,37 @@
 {% block content %}
 <section class="page-section">
   <div class="grid w-full gap-8 lg:grid-cols-[1.1fr_0.9fr] xl:grid-cols-2">
-    <article class="surface-panel flex flex-col justify-between gap-10 overflow-hidden bg-gradient-to-br from-indigo-500/30 via-slate-900/40 to-sky-500/30">
-      <div class="space-y-6">
+    <article class="surface-panel surface-panel--gradient">
+      <div class="stack-lg">
         <span class="page-eyebrow">Coyahue</span>
         <h1 class="page-title">Accede a tu mesa de ayuda</h1>
         <p class="page-subtitle">Centraliza incidencias, prioriza urgencias y coordina a tu equipo con una plataforma pensada para fluir.</p>
       </div>
-      <ul class="grid gap-4 text-sm text-slate-200/85">
-        <li class="flex items-center gap-3"><span class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-800/60 text-lg text-indigo-200"><i class="bi bi-lightning-charge"></i></span>Interfaz ágil para responder solicitudes críticas.</li>
-        <li class="flex items-center gap-3"><span class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-800/60 text-lg text-indigo-200"><i class="bi bi-graph-up"></i></span>Métricas y tendencias para decisiones informadas.</li>
-        <li class="flex items-center gap-3"><span class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-800/60 text-lg text-indigo-200"><i class="bi bi-people"></i></span>Colaboración en tiempo real con todo tu equipo.</li>
+      <ul class="feature-list">
+        <li class="feature-item"><span class="feature-icon"><i class="bi bi-lightning-charge"></i></span>Interfaz ágil para responder solicitudes críticas.</li>
+        <li class="feature-item"><span class="feature-icon"><i class="bi bi-graph-up"></i></span>Métricas y tendencias para decisiones informadas.</li>
+        <li class="feature-item"><span class="feature-icon"><i class="bi bi-people"></i></span>Colaboración en tiempo real con todo tu equipo.</li>
       </ul>
     </article>
 
-    <article class="surface-panel bg-slate-900/60">
-      <header class="mb-8 space-y-2">
-        <h2 class="text-2xl font-semibold text-white">Ingresar</h2>
-        <p class="text-sm text-slate-300">Usa tu cuenta corporativa para acceder al panel.</p>
+    <article class="surface-panel surface-panel--muted">
+      <header class="stack">
+        <h2 class="heading-lg">Ingresar</h2>
+        <p class="text-sm text-muted">Usa tu cuenta corporativa para acceder al panel.</p>
       </header>
-      <form method="post" class="space-y-5">
+      <form method="post" class="stack">
         {% csrf_token %}
-        <div class="space-y-2">
-          <label class="text-sm font-medium text-slate-200" for="username">Usuario</label>
+        <div class="stack">
+          <label class="text-sm text-muted" for="username">Usuario</label>
           <input type="text" id="username" name="username" class="input" required />
         </div>
-        <div class="space-y-2">
-          <label class="text-sm font-medium text-slate-200" for="password">Contraseña</label>
+        <div class="stack">
+          <label class="text-sm text-muted" for="password">Contraseña</label>
           <input type="password" id="password" name="password" class="input" required />
         </div>
         <button class="btn btn-primary w-full" type="submit"><i class="bi bi-door-open"></i> Entrar</button>
       </form>
-      <p class="mt-6 text-xs text-slate-400">¿Olvidaste tu contraseña? Contacta al equipo de soporte para restablecerla.</p>
+      <p class="text-xs text-muted-soft">¿Olvidaste tu contraseña? Contacta al equipo de soporte para restablecerla.</p>
     </article>
   </div>
 </section>

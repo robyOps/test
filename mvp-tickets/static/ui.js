@@ -315,3 +315,36 @@
   }
   document.addEventListener('htmx:afterSwap', e=>applyAll(e.target));
 })();
+// ===== Brand themes: [data-theme] on <html> with persistence =====
+(function(){
+  const root=document.documentElement;
+  const KEY='theme-brand';
+  const saved=localStorage.getItem(KEY);
+  if(saved) root.setAttribute('data-theme', saved);
+
+  // Delegated clicks for [data-pick-theme] buttons or .theme-dot
+  document.addEventListener('click', e=>{
+    const el = e.target.closest('[data-pick-theme], .theme-dot');
+    if(!el) return;
+    const theme = el.getAttribute('data-pick-theme') || el.getAttribute('data-theme');
+    if(!theme) return;
+    root.setAttribute('data-theme', theme);
+    localStorage.setItem(KEY, theme);
+  });
+
+  // Optional: inject minimal picker if container exists
+  function injectPicker(){
+    const host = document.querySelector('[data-theme-picker]');
+    if(!host || host.__bound) return; host.__bound=true;
+    host.classList.add('theme-picker');
+    const themes=['default','emerald','amber','rose','violet','slate'];
+    themes.forEach(t=>{
+      const b=document.createElement('button');
+      b.type='button'; b.className='theme-dot'; b.setAttribute('title', t);
+      b.setAttribute('data-pick-theme', t);
+      b.setAttribute('data-theme', t);
+      host.appendChild(b);
+    });
+  }
+  if(document.readyState!=='loading') injectPicker(); else document.addEventListener('DOMContentLoaded', injectPicker);
+})();

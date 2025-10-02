@@ -153,3 +153,38 @@ body.user-tabbed :where(a,button,input,select,textarea,[role="button"],[tabindex
 
 /* Indicador global ARIA */
 #hx-indicator{box-shadow:0 2px 8px rgba(0,0,0,.08)}
+/* ===== Brand themes via [data-theme] ===== */
+:root,[data-theme="default"]{
+  --brand:59 130 246;            /* azul */
+  --brand-fg:255 255 255;
+  --bg:255 255 255; --fg:15 23 42; --muted:100 116 139;
+}
+[data-theme="emerald"]{ --brand:16 185 129; --brand-fg:255 255 255; }
+[data-theme="amber"]{ --brand:245 158 11; --brand-fg:0 0 0; }
+[data-theme="rose"]{ --brand:244 63 94; --brand-fg:255 255 255; }
+[data-theme="violet"]{ --brand:124 58 237; --brand-fg:255 255 255; }
+[data-theme="slate"]{ --brand:71 85 105; --brand-fg:255 255 255; }
+
+.dark[data-theme="default"]{ --bg:2 6 23; --fg:226 232 240; --muted:148 163 184; }
+.dark[data-theme="emerald"],
+.dark[data-theme="amber"],
+.dark[data-theme="rose"],
+.dark[data-theme="violet"],
+.dark[data-theme="slate"]{
+  --bg:2 6 23; --fg:226 232 240; --muted:148 163 184;
+}
+
+/* Botones y acentos consumen la marca automáticamente */
+.btn-primary{ background:rgb(var(--brand)); color:rgb(var(--brand-fg)); border-color:transparent }
+.progress>i{ background:rgb(var(--brand)) }
+.toolbar .badge, .badge.ok, .badge.warn, .badge.err { border:0 } /* mantiene look limpio */
+
+/* Vista previa opcional de paleta */
+.theme-dot{width:1.25rem;height:1.25rem;border-radius:999px;border:1px solid rgba(0,0,0,.15);display:inline-block;cursor:pointer}
+.theme-picker{display:flex;gap:.5rem;align-items:center}
+.theme-dot[data-theme="default"]{background:rgb(59 130 246)}
+.theme-dot[data-theme="emerald"]{background:rgb(16 185 129)}
+.theme-dot[data-theme="amber"]{background:rgb(245 158 11)}
+.theme-dot[data-theme="rose"]{background:rgb(244 63 94)}
+.theme-dot[data-theme="violet"]{background:rgb(124 58 237)}
+.theme-dot[data-theme="slate"]{background:rgb(71 85 105)}

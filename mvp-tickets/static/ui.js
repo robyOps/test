@@ -25,7 +25,12 @@
   }
 
   function currentPreference() {
-    const stored = localStorage.getItem("theme");
+    let stored;
+    try {
+      stored = localStorage.getItem("theme");
+    } catch (error) {
+      stored = undefined;
+    }
     if (stored === "dark" || stored === "light") {
       return stored;
     }
@@ -35,7 +40,13 @@
   apply(currentPreference());
 
   media.addEventListener("change", (event) => {
-    if (!localStorage.getItem("theme")) {
+    let stored;
+    try {
+      stored = localStorage.getItem("theme");
+    } catch (error) {
+      stored = undefined;
+    }
+    if (!stored) {
       apply(event.matches ? "dark" : "light");
     }
   });
@@ -43,7 +54,11 @@
   if (toggle) {
     toggle.addEventListener("click", () => {
       const next = root.classList.contains("dark") ? "light" : "dark";
-      localStorage.setItem("theme", next);
+      try {
+        localStorage.setItem("theme", next);
+      } catch (error) {
+        // noop
+      }
       apply(next);
     });
   }

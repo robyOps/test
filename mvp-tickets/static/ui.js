@@ -24,462 +24,225 @@
   document.addEventListener("htmx:afterOnLoad",()=>{ind.hidden=true;});
   document.addEventListener("htmx:responseError",()=>{ind.hidden=true;});
 })();
-// Auto-upgrade de formularios y tablas
+
+// Auto-upgrade de formularios y tablas sin tocar templates
 (function(){
-  const busyButtons = new WeakMap();
-  const BUSY_TIMEOUT = 8000;
+  const q = (sel,root=document)=>Array.from(root.querySelectorAll(sel));
 
-  const isClassless = (element) => {
-    const cls = element.getAttribute('class');
-    return !cls || cls.trim().length === 0;
-  };
+  function upgradeForms(root=document){
+    q('input:not([type="checkbox"]):not([type="radio"]):not([class*="input"])', root)
+      .forEach(el=>el.classList.add('input'));
+    q('select:not([class*="input"])', root).forEach(el=>el.classList.add('input'));
+    q('textarea:not([class*="input"])', root).forEach(el=>el.classList.add('input'));
 
-  const forEachMatch = (root, selector, callback) => {
-    if (!root) return;
-    if (root.nodeType === Node.ELEMENT_NODE && root.matches(selector)) {
-      callback(root);
-    }
-    const matches = root.querySelectorAll ? root.querySelectorAll(selector) : [];
-    matches.forEach(callback);
-  };
-
-  const upgradeControls = (root) => {
-    forEachMatch(root, 'input:not([type="hidden"])', (input) => {
-      if (isClassless(input) && !input.classList.contains('input')) {
-        input.classList.add('input');
-      }
+    q('button[type="submit"]:not([class*="btn"])', root).forEach(el=>{
+      el.classList.add('btn','btn-primary');
     });
-    forEachMatch(root, 'select', (select) => {
-      if (isClassless(select) && !select.classList.contains('input')) {
-        select.classList.add('input');
-      }
-    });
-    forEachMatch(root, 'textarea', (textarea) => {
-      if (isClassless(textarea) && !textarea.classList.contains('input')) {
-        textarea.classList.add('input');
-      }
-    });
-    forEachMatch(root, 'button[type="submit"]', (button) => {
-      if (isClassless(button)) {
-        button.classList.add('btn', 'btn-primary');
-      }
-    });
-  };
-
-  const upgradeTables = (root) => {
-    forEachMatch(root, 'table', (table) => {
-      if (isClassless(table) && !table.classList.contains('table')) {
-        table.classList.add('table');
-      }
-      table.querySelectorAll('th').forEach((cell) => {
-        if (isClassless(cell) && !cell.classList.contains('th')) {
-          cell.classList.add('th');
-        }
-      });
-      table.querySelectorAll('td').forEach((cell) => {
-        if (isClassless(cell) && !cell.classList.contains('td')) {
-          cell.classList.add('td');
-        }
-      });
-    });
-  };
-
-  const markButtonBusy = (button) => {
-    if (!button || button.disabled) {
-      return;
-    }
-    button.disabled = true;
-    button.setAttribute('aria-busy', 'true');
-    const timeoutId = window.setTimeout(() => {
-      if (busyButtons.has(button)) {
-        releaseButton(button);
-      }
-    }, BUSY_TIMEOUT);
-    busyButtons.set(button, timeoutId);
-  };
-
-  const releaseButton = (button) => {
-    const timeoutId = busyButtons.get(button);
-    if (typeof timeoutId === 'number') {
-      window.clearTimeout(timeoutId);
-    }
-    busyButtons.delete(button);
-    button.disabled = false;
-    button.removeAttribute('aria-busy');
-  };
-
-  const upgrade = (root) => {
-    upgradeControls(root);
-    upgradeTables(root);
-  };
-
-  document.addEventListener('DOMContentLoaded', () => {
-    upgrade(document);
-  });
-
-  document.addEventListener('htmx:afterSwap', (event) => {
-    upgrade(event.detail && event.detail.target ? event.detail.target : document);
-  });
-
-  document.addEventListener('htmx:load', (event) => {
-    upgrade(event.target || document);
-  });
-
-  document.addEventListener('submit', (event) => {
-    const form = event.target;
-    if (!(form instanceof HTMLFormElement)) {
-      return;
-    }
-    const submitter = event.submitter && event.submitter instanceof HTMLElement ? event.submitter : form.querySelector('button[type="submit"]');
-    if (submitter && submitter.matches('button[type="submit"]')) {
-      markButtonBusy(submitter);
-    }
-  }, true);
-
-  const handleHtmxRelease = (event) => {
-    const config = event.detail && event.detail.requestConfig;
-    if (!config) {
-      return;
-    }
-    const submitter = config.submitter;
-    if (submitter && busyButtons.has(submitter)) {
-      releaseButton(submitter);
-    }
-  };
-
-  document.addEventListener('htmx:afterRequest', handleHtmxRelease);
-  document.addEventListener('htmx:responseError', handleHtmxRelease);
-})();
-// Stats / Cards (opt-in, no template rewrites obligatorios)
-(function(){
-  const SELECTOR = '.stat-card';
-  const RELEVANT_KEYS = new Set(['key','value','delta','status','progress','series']);
-  const STATUS_CLASS_MAP = {
-    ok:'stat-badge-ok',
-    good:'stat-badge-ok',
-    ready:'stat-badge-ok',
-    success:'stat-badge-ok',
-    positive:'stat-badge-ok',
-    warn:'stat-badge-warn',
-    warning:'stat-badge-warn',
-    caution:'stat-badge-warn',
-    pending:'stat-badge-warn',
-    hold:'stat-badge-warn',
-    err:'stat-badge-err',
-    error:'stat-badge-err',
-    danger:'stat-badge-err',
-    fail:'stat-badge-err',
-    down:'stat-badge-err',
-    info:'stat-badge-info',
-    notice:'stat-badge-info',
-    neutral:'stat-badge-neutral',
-    default:'stat-badge-neutral'
-  };
-  const BADGE_VARIANTS = ['stat-badge-ok','stat-badge-warn','stat-badge-err','stat-badge-info','stat-badge-neutral'];
-  const DELTA_VARIANTS = ['delta-positive','delta-negative','delta-neutral'];
-  const cardStore = new WeakMap();
-
-  const hasRelevantData = (card) => {
-    const dataset = card.dataset || {};
-    for(const key of Object.keys(dataset)){
-      if(RELEVANT_KEYS.has(key)) return true;
-    }
-    return false;
-  };
-
-  const takeExistingChildren = (card) => {
-    const existing = [];
-    card.childNodes.forEach(node => {
-      if(node.nodeType === Node.TEXT_NODE && !node.textContent.trim()){
-        return;
-      }
-      existing.push(node);
-    });
-    existing.forEach(node => card.removeChild(node));
-    return existing;
-  };
-
-  const buildCard = (card) => {
-    const preserved = takeExistingChildren(card);
-    const shell = document.createElement('div');
-    shell.className = 'stat-shell';
-
-    const head = document.createElement('div');
-    head.className = 'stat-head';
-
-    const keyEl = document.createElement('span');
-    keyEl.className = 'k';
-    head.appendChild(keyEl);
-
-    const badge = document.createElement('span');
-    badge.className = 'stat-badge';
-    badge.hidden = true;
-    head.appendChild(badge);
-
-    shell.appendChild(head);
-
-    const valueRow = document.createElement('div');
-    valueRow.className = 'stat-value-row';
-
-    const valueEl = document.createElement('span');
-    valueEl.className = 'v';
-    valueRow.appendChild(valueEl);
-
-    const delta = document.createElement('span');
-    delta.className = 'delta';
-    delta.hidden = true;
-    valueRow.appendChild(delta);
-
-    shell.appendChild(valueRow);
-
-    const foot = document.createElement('div');
-    foot.className = 'stat-foot';
-
-    const progressWrap = document.createElement('div');
-    progressWrap.className = 'stat-progress';
-    progressWrap.hidden = true;
-
-    const progressTrack = document.createElement('div');
-    progressTrack.className = 'stat-progress-track';
-    const progressBar = document.createElement('div');
-    progressBar.className = 'stat-progress-bar';
-    progressTrack.appendChild(progressBar);
-
-    const progressValue = document.createElement('span');
-    progressValue.className = 'stat-progress-value';
-
-    progressWrap.append(progressTrack, progressValue);
-    foot.appendChild(progressWrap);
-
-    const sparkline = document.createElementNS('http://www.w3.org/2000/svg','svg');
-    sparkline.setAttribute('class','stat-sparkline');
-    sparkline.setAttribute('viewBox','0 0 120 36');
-    sparkline.setAttribute('preserveAspectRatio','none');
-    sparkline.hidden = true;
-
-    const sparkArea = document.createElementNS('http://www.w3.org/2000/svg','path');
-    const sparkLine = document.createElementNS('http://www.w3.org/2000/svg','polyline');
-    sparkline.append(sparkArea, sparkLine);
-
-    foot.appendChild(sparkline);
-    shell.appendChild(foot);
-
-    card.appendChild(shell);
-
-    if(preserved.length){
-      const extra = document.createElement('div');
-      extra.className = 'stat-extra';
-      preserved.forEach(node => extra.appendChild(node));
-      card.appendChild(extra);
-    }
-
-    card.classList.add('stat-card--hydrated');
-
-    const bundle = {shell, keyEl, badge, valueEl, delta, progressWrap, progressBar, progressValue, sparkline, sparkLine, sparkArea};
-    cardStore.set(card, bundle);
-    return bundle;
-  };
-
-  const ensureCard = (card) => cardStore.get(card) || buildCard(card);
-
-  const pickStatusClass = (status) => {
-    if(!status) return '';
-    const normalized = status.toLowerCase().trim();
-    return STATUS_CLASS_MAP[normalized] || STATUS_CLASS_MAP.default;
-  };
-
-  const parseSeries = (raw) => {
-    if(!raw) return [];
-    const trimmed = raw.trim();
-    if(!trimmed) return [];
-    if(trimmed.startsWith('[')){
-      try{
-        const arr = JSON.parse(trimmed);
-        if(Array.isArray(arr)){
-          return arr.map(Number).filter(Number.isFinite);
-        }
-      }catch(err){/* noop */}
-    }
-    return trimmed.split(/[\s,;|]+/).map(part => {
-      const value = parseFloat(part.replace(/_/g,''));
-      return Number.isFinite(value) ? value : NaN;
-    }).filter(Number.isFinite);
-  };
-
-  const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
-
-  const renderSparkline = (values, nodes) => {
-    if(values.length === 0){
-      nodes.sparkline.hidden = true;
-      return;
-    }
-    const points = values.length === 1 ? [values[0], values[0]] : values.slice();
-    const width = 120;
-    const height = 36;
-    const padding = 4;
-    const maxVal = Math.max(...points);
-    const minVal = Math.min(...points);
-    const range = maxVal - minVal || 1;
-    const step = (width - padding * 2) / (points.length - 1 || 1);
-    const graphHeight = height - padding * 2;
-    const coords = points.map((value, index) => {
-      const ratio = (value - minVal) / range;
-      const x = padding + step * index;
-      const y = height - padding - ratio * graphHeight;
-      return `${x.toFixed(2)},${y.toFixed(2)}`;
-    });
-
-    nodes.sparkline.setAttribute('viewBox', `0 0 ${width} ${height}`);
-    nodes.sparkLine.setAttribute('points', coords.join(' '));
-
-    const lastX = padding + step * (points.length - 1);
-    const areaPath = `M${padding} ${height - padding} ` + coords.map(point => `L ${point}`).join(' ') + ` L ${lastX.toFixed(2)} ${height - padding} Z`;
-    nodes.sparkArea.setAttribute('d', areaPath);
-    nodes.sparkline.hidden = false;
-  };
-
-  const updateCard = (card) => {
-    if(!hasRelevantData(card)) return;
-    const nodes = ensureCard(card);
-    const dataset = card.dataset;
-
-    nodes.keyEl.textContent = dataset.key || '';
-
-    const value = dataset.value;
-    nodes.valueEl.textContent = value !== undefined ? value : '';
-
-    const badgeClass = pickStatusClass(dataset.status || '');
-    nodes.badge.classList.remove(...BADGE_VARIANTS);
-    if(dataset.status && dataset.status.trim()){
-      nodes.badge.hidden = false;
-      if(badgeClass){
-        nodes.badge.classList.add(badgeClass);
-      }
-      nodes.badge.textContent = dataset.status;
-    }else{
-      nodes.badge.hidden = true;
-      nodes.badge.textContent = '';
-    }
-
-    const deltaRaw = dataset.delta;
-    nodes.delta.classList.remove(...DELTA_VARIANTS);
-    if(deltaRaw && deltaRaw.trim()){
-      const trimmed = deltaRaw.trim();
-      const numeric = parseFloat(trimmed.replace(/,/g,'.'));
-      let deltaClass = 'delta-neutral';
-      let arrow = '';
-      if(Number.isFinite(numeric)){
-        if(numeric > 0){
-          arrow = '▲';
-          deltaClass = 'delta-positive';
-        }else if(numeric < 0){
-          arrow = '▼';
-          deltaClass = 'delta-negative';
-        }else{
-          arrow = '—';
-          deltaClass = 'delta-neutral';
-        }
-      }
-      const magnitude = Number.isFinite(numeric) && /^[+\-]/.test(trimmed)
-        ? trimmed.slice(1).trim() || Math.abs(numeric).toString()
-        : trimmed;
-      nodes.delta.textContent = arrow ? `${arrow} ${magnitude}`.trim() : magnitude;
-      nodes.delta.classList.add(deltaClass);
-      nodes.delta.hidden = false;
-    }else{
-      nodes.delta.hidden = true;
-      nodes.delta.textContent = '';
-    }
-
-    const progressRaw = dataset.progress;
-    if(progressRaw !== undefined && progressRaw !== ''){
-      const numeric = parseFloat(String(progressRaw).replace(/,/g,'.'));
-      if(Number.isFinite(numeric)){
-        const valueClamped = clamp(numeric, 0, 100);
-        nodes.progressBar.style.width = `${valueClamped}%`;
-        const rounded = Math.round(valueClamped * 10) / 10;
-        const formatted = Number.isInteger(rounded) ? `${rounded}%` : `${rounded.toFixed(1)}%`;
-        nodes.progressValue.textContent = formatted;
-        nodes.progressWrap.hidden = false;
-      }else{
-        nodes.progressWrap.hidden = true;
-        nodes.progressBar.style.width = '0%';
-        nodes.progressValue.textContent = '';
-      }
-    }else{
-      nodes.progressWrap.hidden = true;
-      nodes.progressBar.style.width = '0%';
-      nodes.progressValue.textContent = '';
-    }
-
-    const seriesValues = parseSeries(dataset.series);
-    if(seriesValues.length){
-      renderSparkline(seriesValues, nodes);
-    }else{
-      nodes.sparkline.hidden = true;
-    }
-  };
-
-  const hydrate = (root) => {
-    const scope = root instanceof Element ? root : document;
-    scope.querySelectorAll(SELECTOR).forEach(updateCard);
-    if(scope instanceof Element && scope.matches && scope.matches(SELECTOR)){
-      updateCard(scope);
-    }
-  };
-
-  const onReady = () => hydrate(document);
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', onReady, {once:true});
-  }else{
-    onReady();
   }
 
-  document.addEventListener('htmx:afterSwap', (event) => {
-    const target = event.detail && event.detail.target ? event.detail.target : document;
-    hydrate(target);
-  });
+  function upgradeTables(root=document){
+    q('table:not([class*="table"])', root).forEach(t=>{
+      t.classList.add('table');
+      q('thead th', t).forEach(th=>th.classList.add('th'));
+      q('tbody td', t).forEach(td=>td.classList.add('td'));
+    });
+  }
 
-  document.addEventListener('htmx:load', (event) => {
-    hydrate(event.target || document);
-  });
+  // Evita doble submit y muestra estado de carga
+  function safeSubmits(root=document){
+    q('form', root).forEach(form=>{
+      if(form.__safeSubmitBound) return;
+      form.__safeSubmitBound = true;
+      form.addEventListener('submit', e=>{
+        const btn = form.querySelector('button[type="submit"].btn') || form.querySelector('button[type="submit"]');
+        if(btn && !btn.hasAttribute('aria-busy')){
+          btn.setAttribute('aria-busy','true');
+          btn.disabled = true;
+          setTimeout(()=>{ 
+            if(btn.getAttribute('aria-busy')==='true'){ btn.disabled=false; btn.removeAttribute('aria-busy'); }
+          }, 8000);
+        }
+      });
+    });
+  }
 
-  const observerConfig = {
-    subtree:true,
-    childList:true,
-    attributes:true,
-    attributeFilter:['data-key','data-value','data-delta','data-status','data-progress','data-series']
-  };
+  function applyAll(root=document){ upgradeForms(root); upgradeTables(root); safeSubmits(root); }
 
-  const startObserver = () => {
-    const body = document.body;
-    if(!body) return;
-    const observer = new MutationObserver((mutations) => {
-      for(const mutation of mutations){
-        if(mutation.type === 'attributes'){
-          const target = mutation.target;
-          if(target instanceof Element && target.matches(SELECTOR)){
-            updateCard(target);
+  if(document.readyState!=='loading') applyAll(); else document.addEventListener('DOMContentLoaded', applyAll);
+  document.addEventListener('htmx:afterSwap', e=>applyAll(e.target));
+})();
+
+// ===== Stats / Cards (opt-in, no template rewrites obligatorios) =====
+(function(){
+  const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+  function fmt(n){ const v=Number(n); return Number.isFinite(v)? v.toLocaleString(): n; }
+
+  function renderSparklines(root=document){
+    $$('.stat-card[data-series]', root).forEach(card=>{
+      if(card.__sparkBound) return; card.__sparkBound=true;
+      const series = String(card.dataset.series||"").split(/[,;\s]+/).map(x=>Number(x)).filter(x=>Number.isFinite(x));
+      if(!series.length) return;
+      const w=240,h=42,p=2, max=Math.max(...series), min=Math.min(...series);
+      const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+      svg.setAttribute('viewBox',`0 0 ${w} ${h}`); svg.classList.add('spark');
+      const path = document.createElementNS(svg.namespaceURI,'path');
+      const norm = v=> h - p - ((v-min)/(max-min||1))*(h-2*p);
+      const step = (w-2*p)/Math.max(series.length-1,1);
+      let d=`M ${p} ${norm(series[0]||0)}`;
+      series.forEach((v,i)=>{ if(i){ d+=` L ${p+i*step} ${norm(v)}`; } });
+      path.setAttribute('d', d);
+      path.setAttribute('fill','none'); path.setAttribute('stroke','currentColor'); path.setAttribute('stroke-width','2');
+      const g=document.createElementNS(svg.namespaceURI,'g'); g.setAttribute('opacity','.8'); g.appendChild(path);
+      svg.appendChild(g);
+      card.querySelector('.spark')?.remove();
+      card.appendChild(svg);
+    });
+  }
+
+  function hydrateStats(root=document){
+    $$('.stat-card', root).forEach(card=>{
+      if(card.__hydrated) return; card.__hydrated=true;
+      const key = card.dataset.key || card.getAttribute('aria-label') || 'Métrica';
+      const val = card.dataset.value || card.textContent.trim();
+      const delta = card.dataset.delta;
+      const status = card.dataset.status;
+      const progress = Number(card.dataset.progress);
+
+      card.innerHTML = `
+        <div class="k">${key}</div>
+        <div class="v">${fmt(val)}</div>
+        <div class="row" style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap"></div>
+      `;
+
+      const row = card.querySelector('.row');
+      if(delta){
+        const dir = String(delta).trim().startsWith('-')?'down':'up';
+        const d = document.createElement('span');
+        d.className = `delta ${dir}`;
+        d.innerHTML = `${dir==='up'?'▲':'▼'} ${delta}`;
+        row.appendChild(d);
+      }
+      if(status){
+        const b = document.createElement('span');
+        b.className = `badge ${status}`;
+        b.textContent = status.toUpperCase();
+        row.appendChild(b);
+      }
+      if(Number.isFinite(progress)){
+        const bar = document.createElement('div'); bar.className='progress';
+        const i = document.createElement('i'); i.style.width = Math.max(0,Math.min(100,progress))+'%';
+        bar.appendChild(i); card.appendChild(bar);
+      }
+      if(card.dataset.series){ const ph = document.createElement('div'); ph.className='spark'; card.appendChild(ph); }
+    });
+  }
+
+  function applyAll(root=document){ hydrateStats(root); renderSparklines(root); }
+  if(document.readyState!=='loading') applyAll(); else document.addEventListener('DOMContentLoaded', applyAll);
+  document.addEventListener('htmx:afterSwap', e=>applyAll(e.target));
+})();
+
+// ===== Listas y estados: chips, acentos y filtros sin tocar templates =====
+(function(){
+  const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+  const norm=t=>String(t||"").toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu,"").trim();
+
+  const STATE_MAP=[
+    {keys:["abierto","open"], cls:"state-open", label:"Abierto", icon:"●"},
+    {keys:["en progreso","in progress","progreso"], cls:"state-inprog", label:"En progreso", icon:"◐"},
+    {keys:["pendiente","pending","en espera","waiting"], cls:"state-pending", label:"Pendiente", icon:"⏳"},
+    {keys:["cerrado","closed","resuelto","resolved"], cls:"state-closed", label:"Cerrado", icon:"✔"}
+  ];
+  const PRI_MAP=[
+    {keys:["alta","high","urgente","urgent","critico","critical","p1","sev1"], cls:"pri-high", label:"Alta"},
+    {keys:["media","medium","normal","p2","sev2"], cls:"pri-med", label:"Media"},
+    {keys:["baja","low","p3","sev3"], cls:"pri-low", label:"Baja"},
+  ];
+
+  function classify(text, map){
+    const t=norm(text);
+    for(const m of map){ if(m.keys.some(k=>t.includes(k))) return m; }
+    return null;
+  }
+
+  function markHeaders(table){
+    const ths=$$('thead th',table);
+    ths.forEach(th=>{
+      const t=norm(th.textContent);
+      if(/estado|status/.test(t)) th.classList.add('is-col-state');
+      if(/prioridad|priority/.test(t)) th.classList.add('is-col-priority');
+    });
+  }
+
+  function enhanceTable(table){
+    if(table.__enhanced) return; table.__enhanced=true;
+    markHeaders(table);
+    const headers=$$('thead th',table);
+    const stateIdx=headers.findIndex(th=>th.classList.contains('is-col-state'));
+    const priIdx=headers.findIndex(th=>th.classList.contains('is-col-priority'));
+
+    $$('tbody tr',table).forEach(tr=>{
+      tr.classList.add('row-accent');
+      const tds=$$('td',tr);
+
+      if(stateIdx>-1 && tds[stateIdx]){
+        const td=tds[stateIdx];
+        if(!td.querySelector('.state-chip')){
+          const raw = td.dataset.status || td.textContent;
+          const m = classify(raw, STATE_MAP);
+          if(m){
+            td.innerHTML = `<span class="state-chip ${m.cls}" aria-label="Estado">${m.icon} ${m.label}</span>`;
           }
         }
-        if(mutation.type === 'childList'){
-          mutation.addedNodes.forEach(node => {
-            if(!(node instanceof Element)) return;
-            if(node.matches && node.matches(SELECTOR)){
-              updateCard(node);
-            }else{
-              hydrate(node);
-            }
-          });
+      }
+
+      if(priIdx>-1 && tds[priIdx]){
+        const td=tds[priIdx];
+        const raw = td.dataset.priority || td.textContent;
+        const m = classify(raw, PRI_MAP);
+        if(m){
+          tr.classList.add(m.cls);
+          if(!td.querySelector('.chip')){
+            td.innerHTML = `<span class="chip ${m.cls==='pri-high'?'chip-err':m.cls==='pri-med'?'chip-warn':'chip-ok'}">${m.label}</span>`;
+          }
         }
       }
     });
-    observer.observe(body, observerConfig);
-  };
 
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', startObserver, {once:true});
-  }else{
-    startObserver();
+    if(stateIdx>-1 && !table.__filtersAdded){
+      table.__filtersAdded=true;
+      const toolbar=document.createElement('div');
+      toolbar.className='table-toolbar';
+      const label=document.createElement('span'); label.textContent='Filtrar:';
+      toolbar.appendChild(label);
+      const allBtn=btn('Todos',()=>applyFilter(null));
+      toolbar.appendChild(allBtn);
+      STATE_MAP.forEach(s=>{
+        const b=btn(s.label,()=>applyFilter(s.cls));
+        toolbar.appendChild(b);
+      });
+      table.parentElement.insertBefore(toolbar, table);
+
+      function btn(text, on){
+        const b=document.createElement('button');
+        b.type='button'; b.className='table-filter'; b.textContent=text;
+        b.addEventListener('click', on); return b;
+      }
+      function applyFilter(cls){
+        $$('tbody tr',table).forEach(tr=>{
+          if(cls==null){ tr.hidden=false; return; }
+          const td = stateIdx>-1 ? $$('td',tr)[stateIdx] : null;
+          const has = td && td.querySelector(`.${cls}`);
+          tr.hidden = !has;
+        });
+      }
+    }
   }
+
+  function applyAll(root=document){
+    $$('table',root).forEach(enhanceTable);
+  }
+
+  if(document.readyState!=='loading') applyAll(); else document.addEventListener('DOMContentLoaded', applyAll);
+  document.addEventListener('htmx:afterSwap', e=>applyAll(e.target));
 })();

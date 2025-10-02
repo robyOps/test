@@ -246,3 +246,72 @@
   if(document.readyState!=='loading') applyAll(); else document.addEventListener('DOMContentLoaded', applyAll);
   document.addEventListener('htmx:afterSwap', e=>applyAll(e.target));
 })();
+// ===== A11y & Performance helpers =====
+(function(){
+  // Focus visible solo cuando se navega con Tab
+  let tabbed=false;
+  window.addEventListener('keydown',e=>{
+    if(e.key==='Tab' && !tabbed){ tabbed=true; document.body.classList.add('user-tabbed'); }
+  });
+  window.addEventListener('mousedown',()=>{ if(tabbed){ tabbed=false; document.body.classList.remove('user-tabbed'); } });
+
+  // Skip link + landmark main sin tocar templates
+  (function injectSkipLink(){
+    const id='main-content';
+    let main = document.querySelector('main,[role="main"]');
+    if(!main){
+      main=document.createElement('div'); main.id=id; main.setAttribute('role','main'); main.tabIndex=-1;
+      document.body.insertBefore(main, document.body.firstChild);
+    }else if(!main.id){ main.id=id; }
+    const skip=document.createElement('a');
+    skip.href='#'+main.id; skip.textContent='Saltar al contenido';
+    skip.style.cssText='position:fixed;left:-999px;top:auto;width:1px;height:1px;overflow:hidden;z-index:1000;background:#fff;padding:.5rem .75rem;border-radius:.5rem;border:1px solid #cbd5e1';
+    skip.addEventListener('focus',()=>{skip.style.left='1rem'; skip.style.top='1rem'; skip.style.width='auto'; skip.style.height='auto';});
+    skip.addEventListener('blur',()=>{skip.style.left='-999px'; skip.style.width='1px'; skip.style.height='1px';});
+    document.body.insertBefore(skip, document.body.firstChild);
+  })();
+
+  // Marcar busy global y accesible durante HTMX
+  document.addEventListener('htmx:beforeRequest',()=>{ document.body.setAttribute('aria-busy','true'); });
+  document.addEventListener('htmx:afterOnLoad',()=>{ document.body.removeAttribute('aria-busy'); });
+  document.addEventListener('htmx:responseError',()=>{ document.body.removeAttribute('aria-busy'); });
+
+  // Lazy de imágenes existente sin tocar templates
+  function lazyImages(root=document){
+    root.querySelectorAll('img:not([loading])').forEach(img=>{ img.loading='lazy'; img.decoding='async'; });
+  }
+
+  // Tablas muy grandes: colapsar y expandir sin perder datos ni eventos
+  function tameHugeTables(root=document){
+    root.querySelectorAll('table').forEach(t=>{
+      if(t.__tamed) return;
+      const tb=t.tBodies && t.tBodies[0]; if(!tb) return;
+      const rows=[...tb.rows]; const N=rows.length; const LIMIT=200;
+      if(N<=LIMIT) return;
+      t.__tamed=true;
+      // Mantén primeras LIMIT filas
+      rows.slice(LIMIT).forEach(r=>r.hidden=true);
+      // Insertar control
+      const ctrl=document.createElement('div');
+      ctrl.style.cssText='text-align:center;margin:.5rem 0';
+      const btn=document.createElement('button');
+      btn.type='button'; btn.className='btn';
+      btn.textContent=`Mostrar más (${N-LIMIT})`;
+      btn.addEventListener('click',()=>{
+        rows.slice(LIMIT).forEach(r=>r.hidden=false);
+        btn.remove();
+      });
+      ctrl.appendChild(btn);
+      t.parentElement.insertBefore(ctrl, t.nextSibling);
+    });
+  }
+
+  // Progressive enhancement en idle y para fragmentos HTMX
+  function applyAll(root=document){ lazyImages(root); tameHugeTables(root); }
+  if('requestIdleCallback' in window){
+    requestIdleCallback(()=>applyAll());
+  }else{
+    setTimeout(()=>applyAll(),0);
+  }
+  document.addEventListener('htmx:afterSwap', e=>applyAll(e.target));
+})();

@@ -1,264 +1,63 @@
+// Tema oscuro con persistencia
 (function(){
-  'use strict';
+  const root=document.documentElement;
+  const saved=localStorage.getItem("theme");
+  if(saved==="dark"||(!saved&&matchMedia("(prefers-color-scheme: dark)").matches)) root.classList.add("dark");
+  document.addEventListener("click",e=>{
+    if(!e.target.closest("#theme-toggle")) return;
+    root.classList.toggle("dark");
+    localStorage.setItem("theme", root.classList.contains("dark")?"dark":"light");
+  });
+})();
 
-  const MODE_KEY = 'ui-theme-mode';
-  const ACCENT_KEY = 'ui-theme-accent';
-  const doc = document.documentElement;
+// Indicador HTMX + aria-busy
+(function(){
+  const ind=document.createElement("div");
+  ind.id="hx-indicator";
+  ind.style.cssText="position:fixed;bottom:1rem;right:1rem;padding:.5rem .75rem;border-radius:10px;border:1px solid rgba(148,163,184,.35);background:rgba(255,255,255,.95);z-index:60";
+  ind.textContent="Cargando…"; ind.hidden=true; document.body.appendChild(ind);
+  document.body.setAttribute("hx-indicator","#hx-indicator");
+  document.addEventListener("htmx:beforeRequest",()=>{ind.hidden=false;document.body.setAttribute("aria-busy","true")});
+  document.addEventListener("htmx:afterOnLoad",()=>{ind.hidden=true;document.body.removeAttribute("aria-busy")});
+  document.addEventListener("htmx:responseError",()=>{ind.hidden=true;document.body.removeAttribute("aria-busy")});
+})();
 
-  function applyMode(mode, persist = true) {
-    if (mode === 'dark') {
-      doc.classList.add('dark');
-    } else {
-      doc.classList.remove('dark');
-      mode = 'light';
-    }
-    if (persist) {
-      try { localStorage.setItem(MODE_KEY, mode); } catch (err) { /* ignore */ }
-    }
-    updateToggleState();
+// Auto-upgrade visual sin tocar templates
+(function(){
+  const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+
+  function upgradeForms(root=document){
+    $$("input:not([type=\"checkbox\"]):not([type=\"radio\"]):not(.input)",root).forEach(el=>el.classList.add('input'));
+    $$("select:not(.input)",root).forEach(el=>el.classList.add('input'));
+    $$("textarea:not(.input)",root).forEach(el=>el.classList.add('input'));
+    $$("button[type=\"submit\"]:not(.btn)",root).forEach(el=>el.classList.add('btn','btn-primary'));
   }
-
-  function preferredMode() {
-    try {
-      const stored = localStorage.getItem(MODE_KEY);
-      if (stored) { return stored; }
-    } catch (err) { /* ignore */ }
-    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  function upgradeTables(root=document){
+    $$("table:not(.table)",root).forEach(t=>{
+      t.classList.add('table'); $$("thead th",t).forEach(th=>th.classList.add('th')); $$("tbody td",t).forEach(td=>td.classList.add('td'));
+    });
   }
-
-  function applyAccent(theme, persist = true) {
-    if (!theme) { return; }
-    doc.setAttribute('data-theme', theme);
-    if (persist) {
-      try { localStorage.setItem(ACCENT_KEY, theme); } catch (err) { /* ignore */ }
-    }
-  }
-
-  function restorePreferences() {
-    applyMode(preferredMode(), false);
-    try {
-      const savedTheme = localStorage.getItem(ACCENT_KEY);
-      if (savedTheme) {
-        applyAccent(savedTheme, false);
-      } else if (!doc.dataset.theme) {
-        doc.dataset.theme = 'default';
-      }
-    } catch (err) {
-      if (!doc.dataset.theme) {
-        doc.dataset.theme = 'default';
-      }
-    }
-  }
-
-  function updateToggleState() {
-    const toggle = document.getElementById('theme-toggle');
-    if (!toggle) return;
-    const isDark = doc.classList.contains('dark');
-    toggle.setAttribute('aria-pressed', isDark ? 'true' : 'false');
-    toggle.setAttribute('data-mode', isDark ? 'dark' : 'light');
-    const label = isDark ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro';
-    toggle.setAttribute('aria-label', label);
-  }
-
-  function setupModeToggle() {
-    const prefers = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
-    if (prefers) {
-      prefers.addEventListener('change', evt => {
-        try {
-          if (!localStorage.getItem(MODE_KEY)) {
-            applyMode(evt.matches ? 'dark' : 'light', false);
-          }
-        } catch (err) {
-          applyMode(evt.matches ? 'dark' : 'light', false);
+  function safeSubmit(root=document){
+    $$("form",root).forEach(f=>{
+      if(f.__bound) return; f.__bound=true;
+      f.addEventListener('submit',()=>{
+        const btn=f.querySelector('button[type="submit"]'); if(!btn) return;
+        if(!btn.hasAttribute('aria-busy')){ btn.setAttribute('aria-busy','true'); btn.disabled=true;
+          setTimeout(()=>{ if(btn.getAttribute('aria-busy')==='true'){ btn.disabled=false; btn.removeAttribute('aria-busy'); } },8000);
         }
       });
-    }
-
-    document.addEventListener('click', event => {
-      const toggle = event.target.closest('#theme-toggle');
-      if (!toggle) return;
-      event.preventDefault();
-      const next = doc.classList.contains('dark') ? 'light' : 'dark';
-      applyMode(next);
     });
   }
-
-  function ensureIndicator() {
-    if (!document.body || document.getElementById('hx-indicator')) return;
-    const indicator = document.createElement('div');
-    indicator.id = 'hx-indicator';
-    indicator.textContent = 'Cargando…';
-    indicator.setAttribute('role', 'status');
-    indicator.setAttribute('aria-live', 'polite');
-    indicator.hidden = true;
-    indicator.classList.add('hidden');
-    document.body.appendChild(indicator);
-    document.body.setAttribute('hx-indicator', '#hx-indicator');
+  function focusMode(){
+    let tabbed=false;
+    addEventListener('keydown',e=>{ if(e.key==='Tab'&&!tabbed){ tabbed=true; document.body.classList.add('user-tabbed'); }});
+    addEventListener('mousedown',()=>{ if(tabbed){ tabbed=false; document.body.classList.remove('user-tabbed'); }});
   }
+  function lazyImgs(root=document){ $$("img:not([loading])",root).forEach(img=>{img.loading='lazy';img.decoding='async';}); }
 
-  function handleHTMXIndicators() {
-    ensureIndicator();
-    const indicator = document.getElementById('hx-indicator');
-    const body = document.body;
-    if (!indicator || !body) return;
-
-    const show = () => {
-      indicator.hidden = false;
-      indicator.classList.remove('hidden');
-      body.setAttribute('aria-busy', 'true');
-    };
-    const hide = () => {
-      indicator.hidden = true;
-      indicator.classList.add('hidden');
-      body.removeAttribute('aria-busy');
-    };
-
-    document.addEventListener('htmx:beforeRequest', show);
-    document.addEventListener('htmx:afterOnLoad', hide);
-    document.addEventListener('htmx:afterRequest', hide);
-    document.addEventListener('htmx:responseError', hide);
+  function applyAll(root=document){ upgradeForms(root); upgradeTables(root); safeSubmit(root); lazyImgs(root); }
+  if(document.readyState!=='loading') { applyAll(); focusMode(); } else {
+    document.addEventListener('DOMContentLoaded',()=>{ applyAll(); focusMode(); });
   }
-
-  function autoEnhance(root) {
-    upgradeInputs(root);
-    upgradeButtons(root);
-    upgradeTables(root);
-  }
-
-  function upgradeInputs(root = document) {
-    const selector = 'input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not(.input), textarea:not(.input), select:not(.input)';
-    root.querySelectorAll(selector).forEach(el => {
-      el.classList.add('input');
-    });
-  }
-
-  function upgradeButtons(root = document) {
-    root.querySelectorAll('button').forEach(btn => {
-      if (!btn.classList.contains('btn')) {
-        btn.classList.add('btn');
-      }
-      if (btn.type === 'submit' && !btn.classList.contains('btn-primary')) {
-        btn.classList.add('btn-primary');
-      }
-    });
-    root.querySelectorAll('a[role="button"]:not(.btn)').forEach(link => {
-      link.classList.add('btn', 'btn-ghost');
-    });
-  }
-
-  function upgradeTables(root = document) {
-    root.querySelectorAll('table').forEach(table => {
-      if (!table.classList.contains('table')) {
-        table.classList.add('table');
-      }
-      table.querySelectorAll('thead th').forEach(th => {
-        th.classList.add('th');
-      });
-      table.querySelectorAll('tbody td').forEach(td => {
-        td.classList.add('td');
-      });
-    });
-  }
-
-  const pendingButtons = new Set();
-
-  function lockButton(btn) {
-    if (!btn || pendingButtons.has(btn)) return;
-    btn.setAttribute('aria-busy', 'true');
-    btn.disabled = true;
-    pendingButtons.add(btn);
-    window.setTimeout(() => releaseButton(btn), 8000);
-  }
-
-  function releaseButton(btn) {
-    if (!btn || !pendingButtons.has(btn)) return;
-    btn.disabled = false;
-    btn.removeAttribute('aria-busy');
-    pendingButtons.delete(btn);
-  }
-
-  function safeSubmits(root = document) {
-    root.querySelectorAll('form').forEach(form => {
-      if (form.dataset.uiSafeSubmit) return;
-      form.dataset.uiSafeSubmit = 'true';
-      form.addEventListener('submit', event => {
-        const submitter = event.submitter || form.querySelector('button[type="submit"]');
-        lockButton(submitter);
-      });
-      form.addEventListener('reset', () => {
-        pendingButtons.forEach(releaseButton);
-      });
-    });
-  }
-
-  function initSubmitReleaseListeners() {
-    document.addEventListener('htmx:afterRequest', () => {
-      pendingButtons.forEach(releaseButton);
-    });
-    document.addEventListener('htmx:responseError', () => {
-      pendingButtons.forEach(releaseButton);
-    });
-  }
-
-  function lazyImages(root = document) {
-    root.querySelectorAll('img').forEach(img => {
-      if (!img.hasAttribute('loading')) {
-        img.setAttribute('loading', 'lazy');
-      }
-      if (!img.hasAttribute('decoding')) {
-        img.setAttribute('decoding', 'async');
-      }
-    });
-  }
-
-  function initThemePicker(root = document) {
-    root.querySelectorAll('[data-theme-picker]').forEach(el => {
-      if (el.dataset.uiThemePickerBound) return;
-      el.dataset.uiThemePickerBound = 'true';
-      if (el.tagName === 'SELECT') {
-        el.value = doc.dataset.theme || 'default';
-        el.addEventListener('change', () => applyAccent(el.value));
-      } else {
-        el.addEventListener('click', evt => {
-          const target = evt.target.closest('[data-theme-value]');
-          if (!target) return;
-          evt.preventDefault();
-          applyAccent(target.getAttribute('data-theme-value'));
-        });
-      }
-    });
-  }
-
-  function initHTMXHooks() {
-    document.addEventListener('htmx:afterSwap', event => {
-      const root = event.target;
-      autoEnhance(root);
-      safeSubmits(root);
-      lazyImages(root);
-      initThemePicker(root);
-    });
-  }
-
-  function onReady(cb) {
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', cb);
-    } else {
-      cb();
-    }
-  }
-
-  restorePreferences();
-  setupModeToggle();
-  initSubmitReleaseListeners();
-  initHTMXHooks();
-
-  onReady(() => {
-    ensureIndicator();
-    handleHTMXIndicators();
-    autoEnhance(document);
-    safeSubmits(document);
-    lazyImages(document);
-    initThemePicker(document);
-    updateToggleState();
-  });
+  document.addEventListener('htmx:afterSwap',e=>applyAll(e.target));
 })();

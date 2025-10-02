@@ -2,95 +2,79 @@
 {% block title %}Mis tickets{% endblock %}
 
 {% block content %}
-<section class="space-y-8">
-  <article class="relative overflow-hidden rounded-3xl border border-indigo-100 bg-gradient-to-br from-indigo-600 via-indigo-500 to-sky-500 p-8 text-white shadow">
-    <div class="relative z-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-      <div class="max-w-2xl space-y-2">
-        <p class="inline-flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.4em]">Tickets</p>
-        <h1 class="text-3xl font-bold tracking-tight">Tu bandeja de solicitudes</h1>
-        <p class="text-sm text-indigo-100 md:text-base">
-          Revisa, prioriza y gestiona cada caso sin enredos. Acá tienes una vista clara de lo que está pasando en tiempo real.
-        </p>
+<section class="page-section">
+  <header class="surface-panel">
+    <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+      <div class="space-y-4">
+        <span class="page-eyebrow">Tickets</span>
+        <h1 class="page-title">Tu bandeja de solicitudes</h1>
+        <p class="page-subtitle">Gestiona cada caso con claridad. Prioriza lo crítico, filtra por estado y coordina a tu equipo con una vista ultra nítida.</p>
       </div>
-      <div class="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
-        <a href="{% url 'ticket_create' %}" class="btn inline-flex items-center gap-2 rounded-full bg-white px-5 py-2 text-sm font-semibold text-indigo-700 shadow-lg shadow-indigo-900/20 transition hover:bg-indigo-50">
-          <i class="bi bi-plus-circle"></i>
-          Levantar ticket
-        </a>
-        <span class="text-xs text-indigo-100">¿Se cayó algo? Levanta un caso y lo atendemos de inmediato.</span>
+      <div class="page-actions">
+        <a href="{% url 'ticket_create' %}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Levantar ticket</a>
       </div>
     </div>
-    <div class="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/10 blur-3xl"></div>
-  </article>
+  </header>
 
   {% if tech_counters %}
-  <section aria-labelledby="resumen-tecnico" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-    <h2 id="resumen-tecnico" class="sr-only">Resumen para técnicos</h2>
-    <article class="flex flex-col gap-2 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-      <div class="flex items-center justify-between">
-        <span class="text-sm font-semibold text-slate-600 uppercase tracking-wider">Asignados a ti</span>
-        <span class="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100 text-indigo-600"><i class="bi bi-person-workspace"></i></span>
-      </div>
-      <p class="text-4xl font-semibold text-slate-900">{{ tech_counters.assigned }}</p>
-      <p class="text-xs text-slate-500">Casos que dependen directamente de ti.</p>
+  <section class="stat-grid">
+    <article class="stat-card">
+      <div class="flex items-center justify-between"><span class="stat-card__label">Asignados a ti</span><span class="stat-card__icon"><i class="bi bi-person-workspace"></i></span></div>
+      <p class="stat-card__value">{{ tech_counters.assigned }}</p>
+      <p class="text-xs text-slate-200/80">Casos que dependen directamente de ti.</p>
     </article>
-    <article class="flex flex-col gap-2 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-      <div class="flex items-center justify-between">
-        <span class="text-sm font-semibold text-slate-600 uppercase tracking-wider">Tickets activos</span>
-        <span class="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-600"><i class="bi bi-activity"></i></span>
-      </div>
-      <p class="text-4xl font-semibold text-slate-900">{{ tech_counters.total }}</p>
-      <p class="text-xs text-slate-500">Todo lo que está en movimiento hoy.</p>
+    <article class="stat-card">
+      <div class="flex items-center justify-between"><span class="stat-card__label">Tickets activos</span><span class="stat-card__icon"><i class="bi bi-activity"></i></span></div>
+      <p class="stat-card__value">{{ tech_counters.total }}</p>
+      <p class="text-xs text-slate-200/80">Todo lo que está en movimiento hoy.</p>
     </article>
-    <article class="flex flex-col gap-2 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-      <div class="flex items-center justify-between">
-        <span class="text-sm font-semibold text-slate-600 uppercase tracking-wider">Por asignar</span>
-        <span class="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 text-amber-600"><i class="bi bi-hourglass-split"></i></span>
-      </div>
-      <p class="text-4xl font-semibold text-slate-900">{{ tech_counters.unassigned }}</p>
-      <p class="text-xs text-slate-500">Toma los pendientes para que nadie se quede sin atención.</p>
+    <article class="stat-card">
+      <div class="flex items-center justify-between"><span class="stat-card__label">Por asignar</span><span class="stat-card__icon"><i class="bi bi-hourglass-split"></i></span></div>
+      <p class="stat-card__value">{{ tech_counters.unassigned }}</p>
+      <p class="text-xs text-slate-200/80">Toma los pendientes para que nadie se quede sin atención.</p>
     </article>
   </section>
   {% endif %}
 
   {% if inbox_links %}
-  <section aria-label="Bandejas rápidas" class="flex flex-wrap items-center gap-2">
-    {% for option in inbox_links %}
-      <a href="{{ option.url }}"
-         class="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-medium transition {% if current_inbox == option.value %}bg-indigo-600 text-white shadow{% else %}bg-white text-slate-600 hover:border-indigo-200 hover:text-indigo-600{% endif %}">
-        <i class="bi bi-inbox"></i>
-        {{ option.label }}
-      </a>
-    {% endfor %}
+  <section class="surface-panel bg-slate-900/60">
+    <h2 class="text-sm font-semibold uppercase tracking-[0.3em] text-slate-300 mb-3">Bandejas rápidas</h2>
+    <div class="flex flex-wrap items-center gap-2">
+      {% for option in inbox_links %}
+        <a href="{{ option.url }}" class="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition {% if current_inbox == option.value %}border-indigo-400 bg-indigo-500/20 text-white{% else %}border-slate-600/40 text-slate-300 hover:border-indigo-300 hover:text-white{% endif %}"><i class="bi bi-inbox"></i>{{ option.label }}</a>
+      {% endfor %}
+    </div>
   </section>
   {% endif %}
 
   <section class="grid gap-6 lg:grid-cols-[minmax(0,18rem)_1fr]">
     <aside class="space-y-6">
-      <article class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 class="text-lg font-semibold text-slate-900">Filtros</h2>
-        <p class="mt-1 text-sm text-slate-500">Afinemos la búsqueda para encontrar rápido el ticket que necesitas.</p>
-        <form method="get" class="mt-4 space-y-4 text-sm">
-          <div class="space-y-1">
-            <label class="text-xs font-semibold uppercase text-slate-500" for="buscar">Buscar</label>
-            <input id="buscar" name="q" value="{{ filters.q }}" class="w-full rounded-xl border border-slate-200 px-3 py-2 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-200" placeholder="Código, título o descripción" />
+      <article class="surface-panel bg-slate-900/60 space-y-4">
+        <header class="space-y-1">
+          <h2 class="text-lg font-semibold text-white">Filtros</h2>
+          <p class="text-xs text-slate-300">Afinemos la búsqueda para encontrar rápido el ticket que necesitas.</p>
+        </header>
+        <form method="get" class="space-y-4 text-sm">
+          <div class="space-y-2">
+            <label class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400" for="buscar">Buscar</label>
+            <input id="buscar" name="q" value="{{ filters.q }}" class="input" placeholder="Código, título o descripción" />
           </div>
-          <div class="space-y-1">
-            <label class="text-xs font-semibold uppercase text-slate-500" for="estado">Estado</label>
-            <select id="estado" name="status" class="w-full rounded-xl border border-slate-200 px-3 py-2 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+          <div class="space-y-2">
+            <label class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400" for="estado">Estado</label>
+            <select id="estado" name="status" class="input">
               <option value="" {% if not filters.status %}selected{% endif %}>(Todos)</option>
               {% for key, label in statuses %}
                 <option value="{{ key }}" {% if filters.status == key %}selected{% endif %}>{{ label }}</option>
               {% endfor %}
             </select>
           </div>
-          <div class="space-y-1">
-            <label class="text-xs font-semibold uppercase text-slate-500" for="categoria">Categoría (ID)</label>
-            <input id="categoria" name="category" value="{{ filters.category }}" class="w-full rounded-xl border border-slate-200 px-3 py-2 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-200" placeholder="Ej: 1" />
+          <div class="space-y-2">
+            <label class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400" for="categoria">Categoría (ID)</label>
+            <input id="categoria" name="category" value="{{ filters.category }}" class="input" placeholder="Ej: 1" />
           </div>
-          <div class="space-y-1">
-            <label class="text-xs font-semibold uppercase text-slate-500" for="prioridad">Prioridad</label>
-            <select id="prioridad" name="priority" class="w-full rounded-xl border border-slate-200 px-3 py-2 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+          <div class="space-y-2">
+            <label class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400" for="prioridad">Prioridad</label>
+            <select id="prioridad" name="priority" class="input">
               <option value="" {% if not filters.priority %}selected{% endif %}>(Todas)</option>
               {% for p in priorities %}
                 <option value="{{ p.id }}" {% if filters.priority|stringformat:'s' == p.id|stringformat:'s' %}selected{% endif %}>{{ p.name }}</option>
@@ -98,199 +82,116 @@
             </select>
           </div>
           <div class="flex items-center justify-between gap-3">
-            <label class="inline-flex items-center gap-2 text-xs font-semibold uppercase text-slate-500">
-              <input type="checkbox" name="alerts" value="1" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" {% if filters.alerts %}checked{% endif %}>
+            <label class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+              <input type="checkbox" name="alerts" value="1" class="h-4 w-4 rounded border-slate-500 bg-slate-700 text-indigo-400 focus:ring-indigo-500" {% if filters.alerts %}checked{% endif %}>
               Alertas SLA
             </label>
-            <label class="inline-flex items-center gap-2 text-xs font-semibold uppercase text-slate-500">
-              <input type="checkbox" name="hide_closed" value="1" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" {% if filters.hide_closed == '1' %}checked{% endif %}>
+            <label class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+              <input type="checkbox" name="hide_closed" value="1" class="h-4 w-4 rounded border-slate-500 bg-slate-700 text-indigo-400 focus:ring-indigo-500" {% if filters.hide_closed == '1' %}checked{% endif %}>
               Ocultar cerrados
             </label>
           </div>
-          <div class="space-y-1">
-            <label class="text-xs font-semibold uppercase text-slate-500" for="pagina">Por página</label>
-            <input id="pagina" name="page_size" value="{{ page_size }}" class="w-24 rounded-xl border border-slate-200 px-3 py-2 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-200" />
+          <div class="space-y-2">
+            <label class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400" for="pagina">Por página</label>
+            <input id="pagina" name="page_size" value="{{ page_size }}" class="input w-24" />
           </div>
-          <div class="flex flex-wrap items-center gap-2">
-            <button class="btn inline-flex items-center gap-2 rounded-full bg-indigo-600 px-4 py-2 font-semibold text-white shadow hover:bg-indigo-700" type="submit">
-              <i class="bi bi-funnel"></i> Aplicar
-            </button>
-            <a href="{% url 'tickets_home' %}" class="btn inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 font-semibold text-slate-600 hover:border-indigo-200 hover:text-indigo-600">
-              <i class="bi bi-eraser"></i> Limpiar
-            </a>
+          <div class="flex flex-wrap items-center gap-3">
+            <button class="btn btn-primary" type="submit"><i class="bi bi-funnel"></i> Aplicar</button>
+            <a href="{% url 'tickets_home' %}" class="btn btn-ghost"><i class="bi bi-eraser"></i> Limpiar</a>
           </div>
         </form>
       </article>
-      <p class="rounded-2xl border border-slate-200 bg-white p-4 text-xs text-slate-500">
-        Consejo: deja registro de cada actualización para que todo el equipo mantenga el contexto al instante.
-      </p>
+      <p class="surface-panel bg-slate-900/40 p-4 text-xs text-slate-300">Consejo: registra cada actualización para que todo el equipo mantenga contexto.</p>
     </aside>
 
     <div class="space-y-6">
-      <article class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-        <div class="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-          <h2 class="text-lg font-semibold text-slate-900">Listado de tickets</h2>
-          <p class="text-xs text-slate-500">Ordena por columna para ver lo más urgente primero.</p>
+      <article class="surface-panel bg-slate-900/60">
+        <div class="flex flex-col gap-3 border-b border-slate-700/40 pb-4 sm:flex-row sm:items-center sm:justify-between">
+          <h2 class="text-lg font-semibold text-white">Listado de tickets</h2>
+          <p class="text-xs text-slate-400">Ordena por columna para ver lo más urgente primero.</p>
         </div>
-        <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-slate-100 text-sm">
-            <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-600">
+        <div class="mt-4 overflow-x-auto">
+          <table class="table text-sm">
+            <thead>
               <tr>
-                <th scope="col" class="px-4 py-3 text-left">Código
-                  <a href="?sort=code{{ qs_no_sort }}" class="ml-1 inline-flex h-5 w-5 items-center justify-center rounded-full text-slate-400 hover:text-indigo-500"><i class="bi bi-arrow-up"></i></a>
-                  <a href="?sort=-code{{ qs_no_sort }}" class="ml-1 inline-flex h-5 w-5 items-center justify-center rounded-full text-slate-400 hover:text-indigo-500"><i class="bi bi-arrow-down"></i></a>
+                <th scope="col" class="th">Código
+                  <a href="?sort=code{{ qs_no_sort }}" class="ml-1 text-slate-400 hover:text-white"><i class="bi bi-arrow-up"></i></a>
+                  <a href="?sort=-code{{ qs_no_sort }}" class="ml-1 text-slate-400 hover:text-white"><i class="bi bi-arrow-down"></i></a>
                 </th>
-                <th scope="col" class="px-4 py-3 text-left">Título
-                  <a href="?sort=title{{ qs_no_sort }}" class="ml-1 inline-flex h-5 w-5 items-center justify-center rounded-full text-slate-400 hover:text-indigo-500"><i class="bi bi-arrow-up"></i></a>
-                  <a href="?sort=-title{{ qs_no_sort }}" class="ml-1 inline-flex h-5 w-5 items-center justify-center rounded-full text-slate-400 hover:text-indigo-500"><i class="bi bi-arrow-down"></i></a>
+                <th scope="col" class="th">Título
+                  <a href="?sort=title{{ qs_no_sort }}" class="ml-1 text-slate-400 hover:text-white"><i class="bi bi-arrow-up"></i></a>
+                  <a href="?sort=-title{{ qs_no_sort }}" class="ml-1 text-slate-400 hover:text-white"><i class="bi bi-arrow-down"></i></a>
                 </th>
-                <th scope="col" class="px-4 py-3 text-left">Estado
-                  <a href="?sort=status{{ qs_no_sort }}" class="ml-1 inline-flex h-5 w-5 items-center justify-center rounded-full text-slate-400 hover:text-indigo-500"><i class="bi bi-arrow-up"></i></a>
-                  <a href="?sort=-status{{ qs_no_sort }}" class="ml-1 inline-flex h-5 w-5 items-center justify-center rounded-full text-slate-400 hover:text-indigo-500"><i class="bi bi-arrow-down"></i></a>
+                <th scope="col" class="th">Estado
+                  <a href="?sort=status{{ qs_no_sort }}" class="ml-1 text-slate-400 hover:text-white"><i class="bi bi-arrow-up"></i></a>
+                  <a href="?sort=-status{{ qs_no_sort }}" class="ml-1 text-slate-400 hover:text-white"><i class="bi bi-arrow-down"></i></a>
                 </th>
-                <th scope="col" class="px-4 py-3 text-left">Tipo
-                  <a href="?sort=kind{{ qs_no_sort }}" class="ml-1 inline-flex h-5 w-5 items-center justify-center rounded-full text-slate-400 hover:text-indigo-500"><i class="bi bi-arrow-up"></i></a>
-                  <a href="?sort=-kind{{ qs_no_sort }}" class="ml-1 inline-flex h-5 w-5 items-center justify-center rounded-full text-slate-400 hover:text-indigo-500"><i class="bi bi-arrow-down"></i></a>
+                <th scope="col" class="th">Tipo
+                  <a href="?sort=kind{{ qs_no_sort }}" class="ml-1 text-slate-400 hover:text-white"><i class="bi bi-arrow-up"></i></a>
+                  <a href="?sort=-kind{{ qs_no_sort }}" class="ml-1 text-slate-400 hover:text-white"><i class="bi bi-arrow-down"></i></a>
                 </th>
-                <th scope="col" class="px-4 py-3 text-left">Categoría
-                  <a href="?sort=category__name{{ qs_no_sort }}" class="ml-1 inline-flex h-5 w-5 items-center justify-center rounded-full text-slate-400 hover:text-indigo-500"><i class="bi bi-arrow-up"></i></a>
-                  <a href="?sort=-category__name{{ qs_no_sort }}" class="ml-1 inline-flex h-5 w-5 items-center justify-center rounded-full text-slate-400 hover:text-indigo-500"><i class="bi bi-arrow-down"></i></a>
+                <th scope="col" class="th">Categoría
+                  <a href="?sort=category__name{{ qs_no_sort }}" class="ml-1 text-slate-400 hover:text-white"><i class="bi bi-arrow-up"></i></a>
+                  <a href="?sort=-category__name{{ qs_no_sort }}" class="ml-1 text-slate-400 hover:text-white"><i class="bi bi-arrow-down"></i></a>
                 </th>
-                <th scope="col" class="px-4 py-3 text-left">Prioridad
-                  <a href="?sort=priority__name{{ qs_no_sort }}" class="ml-1 inline-flex h-5 w-5 items-center justify-center rounded-full text-slate-400 hover:text-indigo-500"><i class="bi bi-arrow-up"></i></a>
-                  <a href="?sort=-priority__name{{ qs_no_sort }}" class="ml-1 inline-flex h-5 w-5 items-center justify-center rounded-full text-slate-400 hover:text-indigo-500"><i class="bi bi-arrow-down"></i></a>
+                <th scope="col" class="th">Prioridad
+                  <a href="?sort=priority__name{{ qs_no_sort }}" class="ml-1 text-slate-400 hover:text-white"><i class="bi bi-arrow-up"></i></a>
+                  <a href="?sort=-priority__name{{ qs_no_sort }}" class="ml-1 text-slate-400 hover:text-white"><i class="bi bi-arrow-down"></i></a>
                 </th>
-                <th scope="col" class="px-4 py-3 text-left">Asignado
-                  <a href="?sort=assigned_to__username{{ qs_no_sort }}" class="ml-1 inline-flex h-5 w-5 items-center justify-center rounded-full text-slate-400 hover:text-indigo-500"><i class="bi bi-arrow-up"></i></a>
-                  <a href="?sort=-assigned_to__username{{ qs_no_sort }}" class="ml-1 inline-flex h-5 w-5 items-center justify-center rounded-full text-slate-400 hover:text-indigo-500"><i class="bi bi-arrow-down"></i></a>
+                <th scope="col" class="th">Asignado
+                  <a href="?sort=assigned_to__username{{ qs_no_sort }}" class="ml-1 text-slate-400 hover:text-white"><i class="bi bi-arrow-up"></i></a>
+                  <a href="?sort=-assigned_to__username{{ qs_no_sort }}" class="ml-1 text-slate-400 hover:text-white"><i class="bi bi-arrow-down"></i></a>
                 </th>
-                <th scope="col" class="px-4 py-3 text-left">SLA</th>
-                <th scope="col" class="px-4 py-3 text-left">Creado
-                  <a href="?sort=created_at{{ qs_no_sort }}" class="ml-1 inline-flex h-5 w-5 items-center justify-center rounded-full text-slate-400 hover:text-indigo-500"><i class="bi bi-arrow-up"></i></a>
-                  <a href="?sort=-created_at{{ qs_no_sort }}" class="ml-1 inline-flex h-5 w-5 items-center justify-center rounded-full text-slate-400 hover:text-indigo-500"><i class="bi bi-arrow-down"></i></a>
+                <th scope="col" class="th">SLA</th>
+                <th scope="col" class="th">Creado
+                  <a href="?sort=created_at{{ qs_no_sort }}" class="ml-1 text-slate-400 hover:text-white"><i class="bi bi-arrow-up"></i></a>
+                  <a href="?sort=-created_at{{ qs_no_sort }}" class="ml-1 text-slate-400 hover:text-white"><i class="bi bi-arrow-down"></i></a>
                 </th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100">
+            <tbody>
               {% for t in tickets %}
-              <tr
-                class="group cursor-pointer transition hover:bg-indigo-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-indigo-500 {% if t.is_overdue %}bg-rose-50/70 hover:bg-rose-100/80{% elif t.is_warning %}bg-amber-50/70 hover:bg-amber-100/80{% endif %}"
-                data-ticket-row
-                data-href="{% url 'ticket_detail' t.id %}"
-                tabindex="0"
-                role="link"
-                aria-label="Abrir ticket {{ t.code }}"
-              >
-                <td class="px-4 py-3 font-semibold text-indigo-600">
-                  <a class="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-3 py-1 text-sm font-semibold text-indigo-700 transition group-hover:bg-indigo-100 focus-visible:outline-none" href="{% url 'ticket_detail' t.id %}">
-                    <i class="bi bi-hash"></i>
-                    {{ t.code }}
+              <tr class="cursor-pointer transition hover:bg-indigo-500/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-indigo-400 {% if t.is_overdue %}bg-rose-500/10 hover:bg-rose-500/20{% elif t.is_warning %}bg-amber-500/10 hover:bg-amber-500/20{% endif %}"
+                data-ticket-row data-href="{% url 'ticket_detail' t.id %}" tabindex="0" role="link" aria-label="Abrir ticket {{ t.code }}">
+                <td class="td font-semibold text-indigo-100">
+                  <a class="inline-flex items-center gap-1 rounded-full border border-indigo-400/40 bg-indigo-500/15 px-3 py-1 text-sm font-semibold text-indigo-100 transition hover:border-indigo-300 hover:text-white focus-visible:outline-none" href="{% url 'ticket_detail' t.id %}">
+                    <i class="bi bi-hash"></i>{{ t.code }}
                   </a>
                 </td>
-                <td class="px-4 py-3 text-slate-700">{{ t.title }}</td>
-                <td class="px-4 py-3">
-                  <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold {% if t.status == 'OPEN' %}bg-sky-100 text-sky-700{% elif t.status == 'IN_PROGRESS' %}bg-amber-100 text-amber-700{% elif t.status == 'RESOLVED' %}bg-emerald-100 text-emerald-700{% else %}bg-slate-100 text-slate-600{% endif %}">
-                    <i class="bi bi-circle-fill text-[8px]"></i>
-                    {{ t.get_status_display }}
+                <td class="td text-slate-200">{{ t.title }}</td>
+                <td class="td">
+                  <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold {% if t.status == 'OPEN' %}bg-sky-500/15 text-sky-100{% elif t.status == 'IN_PROGRESS' %}bg-amber-500/15 text-amber-100{% elif t.status == 'RESOLVED' %}bg-emerald-500/15 text-emerald-100{% else %}bg-slate-600/30 text-slate-200{% endif %}">
+                    <i class="bi bi-circle-fill text-[8px]"></i>{{ t.get_status_display }}
                   </span>
                 </td>
-                <td class="px-4 py-3">
-                  <span class="inline-flex items-center gap-1 text-slate-600">
+                <td class="td text-slate-300">
+                  <span class="inline-flex items-center gap-1 text-slate-200">
                     {{ t.get_kind_display }}
-                    {% if t.kind == 'INCIDENT' %}
-                      <i class="bi bi-exclamation-triangle-fill text-rose-500" title="Incidente: interrupción o degradación del servicio."></i>
-                    {% elif t.kind == 'REQUEST' %}
-                      <i class="bi bi-clipboard-check text-emerald-600" title="Solicitud: requerimiento o petición de servicio."></i>
-                    {% else %}
-                      <i class="bi bi-info-circle text-gray-500" title="Clasificación del ticket"></i>
-                    {% endif %}
+                    {% if t.kind == 'INCIDENT' %}<i class="bi bi-lightning-charge-fill text-amber-200"></i>{% endif %}
                   </span>
                 </td>
-                <td class="px-4 py-3 text-slate-600">{{ t.category.name }}</td>
-                <td class="px-4 py-3 text-slate-600">{{ t.priority.name }}</td>
-                <td class="px-4 py-3 text-slate-600">{% if t.assigned_to %}{{ t.assigned_to.username }}{% else %}<span class="text-slate-400">Sin asignar</span>{% endif %}</td>
-                <td class="px-4 py-3 space-y-1">
-                  {% if t.is_overdue %}
-                    <span class="inline-flex items-center gap-2 rounded-full bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-600"><i class="bi bi-alarm"></i> SLA vencido</span>
-                  {% elif t.is_warning %}
-                    <span class="inline-flex items-center gap-2 rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700"><i class="bi bi-hourglass"></i> Por vencer (~{{ t.remaining_hours|floatformat:0 }}h)</span>
-                  {% endif %}
-                  {% if t.is_critical %}
-                    <span class="inline-flex items-center gap-2 rounded-full bg-rose-600 px-3 py-1 text-xs font-semibold text-white"><i class="bi bi-lightning"></i> Crítico</span>
+                <td class="td text-slate-300">{{ t.category.name|default:"—" }}</td>
+                <td class="td text-slate-300">{{ t.priority.name|default:"—" }}</td>
+                <td class="td text-slate-300">{% if t.assigned_to %}{{ t.assigned_to.username }}{% else %}—{% endif %}</td>
+                <td class="td">
+                  {% if t.remaining_hours %}
+                  <span class="inline-flex items-center gap-2 rounded-full bg-amber-500/20 px-3 py-1 text-xs font-semibold text-amber-100"><i class="bi bi-hourglass-split"></i>{{ t.remaining_hours|floatformat:1 }} h</span>
+                  {% else %}
+                  <span class="text-xs text-slate-400">—</span>
                   {% endif %}
                 </td>
-                <td class="px-4 py-3 text-slate-500">{{ t.created_at }}</td>
+                <td class="td text-slate-400">{{ t.created_at|date:'d/m/Y H:i' }}</td>
               </tr>
               {% empty %}
               <tr>
-                <td class="px-4 py-8 text-center text-sm text-slate-500" colspan="9">
-                  <div class="flex flex-col items-center gap-2">
-                    <i class="bi bi-emoji-smile text-2xl text-indigo-400"></i>
-                    <p>No tienes tickets en esta vista. Aprovecha de tomarte un cafecito.</p>
-                  </div>
-                </td>
+                <td class="td text-center text-sm text-slate-400" colspan="9">Sin resultados en este momento.</td>
               </tr>
               {% endfor %}
             </tbody>
           </table>
         </div>
-
-        {% if page_obj and page_obj.paginator.num_pages > 1 %}
-        <footer class="flex flex-col gap-3 border-t border-slate-100 px-6 py-4 text-sm text-slate-600 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }} · {{ page_obj.paginator.count }} resultados
-          </div>
-          <nav class="flex flex-wrap items-center gap-2" aria-label="Paginación">
-            {% with qsp="q="|add:filters.q|urlencode|add:"&status="|add:filters.status|add:"&category="|add:filters.category|add:"&priority="|add:filters.priority|add:"&alerts="|add:filters.alerts|add:"&hide_closed="|add:filters.hide_closed|add:"&page_size="|add:page_size %}
-              {% if page_obj.has_previous %}
-                <a class="btn inline-flex items-center gap-2 rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:border-indigo-200 hover:text-indigo-600" href="?{{ qsp }}&page=1">&laquo; Primera</a>
-                <a class="btn inline-flex items-center gap-2 rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:border-indigo-200 hover:text-indigo-600" href="?{{ qsp }}&page={{ page_obj.previous_page_number }}">Anterior</a>
-              {% else %}
-                <span class="inline-flex items-center gap-2 rounded-full border border-dashed border-slate-200 px-3 py-1.5 text-xs text-slate-400">&laquo; Primera</span>
-                <span class="inline-flex items-center gap-2 rounded-full border border-dashed border-slate-200 px-3 py-1.5 text-xs text-slate-400">Anterior</span>
-              {% endif %}
-              {% if page_obj.has_next %}
-                <a class="btn inline-flex items-center gap-2 rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:border-indigo-200 hover:text-indigo-600" href="?{{ qsp }}&page={{ page_obj.next_page_number }}">Siguiente</a>
-                <a class="btn inline-flex items-center gap-2 rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:border-indigo-200 hover:text-indigo-600" href="?{{ qsp }}&page={{ page_obj.paginator.num_pages }}">Última &raquo;</a>
-              {% else %}
-                <span class="inline-flex items-center gap-2 rounded-full border border-dashed border-slate-200 px-3 py-1.5 text-xs text-slate-400">Siguiente</span>
-                <span class="inline-flex items-center gap-2 rounded-full border border-dashed border-slate-200 px-3 py-1.5 text-xs text-slate-400">Última &raquo;</span>
-              {% endif %}
-            {% endwith %}
-          </nav>
-        </footer>
-        {% endif %}
       </article>
     </div>
   </section>
 </section>
 {% endblock %}
-
-{% block body_extra %}
-{{ block.super }}
-<script>
-  // Navegación amigable: permite abrir un ticket haciendo clic en cualquier fila o usando Enter.
-  document.querySelectorAll('[data-ticket-row]').forEach(function (fila) {
-    fila.addEventListener('click', function (evento) {
-      const destino = fila.getAttribute('data-href');
-      const objetivo = evento.target;
-      const esElemento = objetivo instanceof Element;
-      const enlaceCercano = esElemento ? objetivo.closest('a') : null;
-      if (destino && !enlaceCercano) {
-        window.location.href = destino;
-      }
-    });
-    fila.addEventListener('keydown', function (evento) {
-      if (evento.key === 'Enter' || evento.key === ' ') {
-        evento.preventDefault();
-        const destino = fila.getAttribute('data-href');
-        if (destino) {
-          window.location.href = destino;
-        }
-      }
-    });
-  });
-</script>
-{% endblock %}
-
-

@@ -1,8 +1,9 @@
 {% load static %}
 {% load roles notifications %} {# filtros personalizados #}
 <!doctype html>
-<html lang="es">
+<html lang="es" data-theme="default">
 <head>
+  <!-- UI-REFRESH-SAFE v1 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{% block title %}Helpdesk{% endblock %}</title>
@@ -82,6 +83,7 @@
   {% block head_extra %}{% endblock %}
 </head>
 <body class="bg-gray-50 text-gray-900">
+  <a class="skip-link" href="#main-content">Saltar al contenido</a>
   {% if messages %}
   <div class="toast-wrap" role="status" aria-live="polite">
     {% for message in messages %}
@@ -164,7 +166,7 @@
   </header>
 
 
-  <main class="w-full px-6 py-6">
+  <main id="main-content" class="w-full px-6 py-6" tabindex="-1">
     {% block content %}{% endblock %}
   </main>
 

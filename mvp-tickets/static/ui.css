@@ -9,6 +9,23 @@
 html{font-size:clamp(14px,1.05vw,16px)}
 body{background-color:rgb(var(--bg));color:rgb(var(--fg));}
 
+.skip-link{
+  position:fixed;
+  top:1rem;
+  left:1rem;
+  padding:.5rem .75rem;
+  border-radius:.5rem;
+  border:1px solid rgba(148,163,184,.65);
+  background:#fff;
+  color:rgb(var(--fg));
+  font-weight:600;
+  transform:translateY(-200%);
+  transition:transform .2s ease, box-shadow .2s ease;
+  z-index:100;
+}
+.skip-link:focus{outline:3px solid rgba(59,130,246,.5);outline-offset:2px;transform:translateY(0);box-shadow:0 10px 30px rgba(15,23,42,.2);}
+.dark .skip-link{background:rgba(15,23,42,.95);border-color:rgba(148,163,184,.55);color:rgb(var(--fg));}
+
 .card{border:1px solid rgba(148,163,184,.25);border-radius:var(--radius);
   background:rgba(255,255,255,.75);backdrop-filter:saturate(140%) blur(6px);
   box-shadow:0 1px 2px rgba(0,0,0,.04)}

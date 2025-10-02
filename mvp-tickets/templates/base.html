@@ -1,7 +1,7 @@
 {% load static %}
 {% load roles notifications %}
 <!doctype html>
-<html lang="es" data-theme="default">
+<html lang="es">
 <head>
   <!-- UI-REFRESH-PRO v2 -->
   <meta charset="utf-8" />
@@ -22,7 +22,7 @@
   <link rel="stylesheet" href="{% static 'ui.css' %}">
   {% block head_extra %}{% endblock %}
 </head>
-<body class="app-body text-slate-100">
+<body class="app-body">
   <a class="skip-link" href="#main-content">Saltar al contenido</a>
 
   <div class="app-background" aria-hidden="true">
@@ -48,7 +48,7 @@
           <span class="brand-mark">Coyahue</span>
           <span class="brand-name">Helpdesk</span>
         </a>
-        <p class="brand-tagline">Soporte inteligente, gestión impecable.</p>
+        <p class="brand-tagline">Soporte inteligente con una experiencia visual de clase enterprise.</p>
       </div>
 
       {% if request.user.is_authenticated %}
@@ -75,8 +75,8 @@
       {% endif %}
 
       <div class="app-header__actions">
-        <button id="theme-toggle" class="btn btn-ghost" type="button" aria-label="Cambiar tema">
-          <i class="bi bi-brightness-high"></i>
+        <button id="theme-toggle" class="btn btn-ghost" type="button" aria-label="Cambiar tema" aria-pressed="false">
+          <i class="bi bi-brightness-high" aria-hidden="true"></i>
         </button>
 
         {% if request.user.is_authenticated %}

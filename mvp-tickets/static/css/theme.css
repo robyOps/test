@@ -13,13 +13,13 @@
 /* === 2) Tokens claro/oscuro === */
 @layer tokens {
   :root{
-    --bg:#ffffff; --fg:#0a0a0a; --muted:#6b7280;
-    --surface:#f6f8fa; --surface-2:#eef2f7; --border:#e5e7eb;
-    --primary:#1f6feb; --primary-fg:#ffffff;
+    --bg:#f4f6fb; --fg:#111827; --muted:#6b7280;
+    --surface:#ffffff; --surface-2:#eef2ff; --border:#d8e1f2;
+    --primary:#2563eb; --primary-fg:#f8fafc;
     --danger:#e11d48; --warning:#f59e0b; --success:#10b981; --info:#0ea5e9;
     --focus:#7c3aed;
     --radius:12px; --radius-sm:8px;
-    --shadow:0 1px 2px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.08);
+    --shadow:0 1px 2px rgba(15,23,42,.04),0 10px 30px rgba(15,23,42,.08);
     --font: ui-sans-serif, system-ui, -apple-system,"Segoe UI",Roboto,Arial,"Helvetica Neue";
     --kbd:#111827; --kbd-fg:#e5e7eb;
   }
